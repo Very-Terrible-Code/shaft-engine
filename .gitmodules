@@ -1,0 +1,6 @@
+[submodule "SHAFT/Vendor/glad"]
+	path = SHAFT/Vendor/glad
+	url = https://github.com/Dav1dde/glad.git
+[submodule "SHAFT/Vendor/glm"]
+	path = SHAFT/Vendor/glm
+	url = https://github.com/g-truc/glm.git
