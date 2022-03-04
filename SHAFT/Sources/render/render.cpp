@@ -46,6 +46,7 @@ void WdrawSprite(GAME *game, GLuint *texture, glm::vec2 position, glm::vec2 size
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, *texture);
+    
 
     glBindVertexArray(game->gl.quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);

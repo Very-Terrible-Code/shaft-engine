@@ -18,6 +18,7 @@ else()
 endif()
 
 include_directories(SHAFT/Headers/
+                    SHAFT/ImGui/Headers/
                     SHAFT/Vendor/glad/include/
                     SHAFT/Vendor/glfw/include/
                     SHAFT/Vendor/glm/
@@ -26,7 +27,7 @@ include_directories(SHAFT/Headers/
 
 
                    
-file(GLOB VENDORS_SOURCES SHAFT/Vendor/glad/src/glad.c)
+file(GLOB VENDORS_SOURCES SHAFT/Vendor/glad/src/glad.c + SHAFT/ImGui/Sources/*)
 file(GLOB PROJECT_HEADERS SHAFT/Headers/*.h)
 file(GLOB PROJECT_SOURCES SHAFT/Sources/*.cpp + SHAFT/Sources/render/*.cpp + SHAFT/Sources/util/wm/*.cpp + SHAFT/Sources/logic/*.cpp)
 file(GLOB PROJECT_CONFIGS CMakeLists.txt

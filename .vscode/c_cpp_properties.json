@@ -4,8 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/SHAFT/Headers/**"
+                "${workspaceFolder}/SHAFT/Headers/**",
+                "${workspaceFolder}/build/SHAFT/Vendor/glad/include/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

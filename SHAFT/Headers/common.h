@@ -16,6 +16,7 @@ typedef struct openglSet
 typedef struct GAME
 {
     SDL_Window *window;
+    SDL_GLContext context;
     int winw;
     int winh;
     openglSet gl;
