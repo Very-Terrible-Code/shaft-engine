@@ -3,6 +3,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "render/render.h"
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl.h"
 #include <glad/glad.h>
 
 std::string readFileIntoString(const std::string &path)
@@ -37,6 +40,21 @@ void initGame(GAME *instance, int width, int height)
     instance->winh = height;
     instance->gl.shader.Compile(readFileIntoString("rsc/transp.vert").c_str(), readFileIntoString("rsc/texc.frag").c_str());
     initRenderer(instance);
-
+    instance->gameRunning = true;
     return;
 }
+
+
+void initImGui(GAME* game){
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
+
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplSDL2_InitForOpenGL(game->window, game->context);
+    ImGui_ImplOpenGL3_Init();
+}
+

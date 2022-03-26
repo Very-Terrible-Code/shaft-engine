@@ -5,6 +5,33 @@
 #include "logic/math.h"
 #include "render/shader.h"
 
+
+typedef struct keyStat
+{
+    bool keydown;
+    bool keyup;
+    bool keyheld;
+} keyStat;
+
+typedef struct key
+{
+    unsigned int key;
+    char *tag;
+    keyStat status;
+} key;
+
+typedef struct keydb
+{
+    std::vector<key> keys;
+
+} keydb;
+
+typedef struct inHandle
+{
+    SDL_Event inps;
+    keydb db;
+} inHandle;
+
 typedef struct openglSet
 {
     glm::mat4 projection;
@@ -17,9 +44,12 @@ typedef struct GAME
 {
     SDL_Window *window;
     SDL_GLContext context;
+    inHandle input;
     int winw;
     int winh;
     openglSet gl;
+    bool gameRunning;
+
 } GAME;
 
 typedef struct tex

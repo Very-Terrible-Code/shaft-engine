@@ -1,6 +1,7 @@
 #include "shaft-engine.h"
 #include <glad/glad.h>
 #include <iostream>
+#include "render/stb_image.h"
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
@@ -26,7 +27,31 @@ int main()
     std::cout << "And here's our number:" << answer << std::endl;
 
     // tex load
-    tex gaming = loadTexture("rsc/awesomeface.png", NOFLIP);
+    //tex gaming = loadTexture("rsc/awesomeface.png", NOFLIP);
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+    unsigned char *data = stbi_load("rsc/test.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+    std::cout << texture << std::endl;
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -43,7 +68,7 @@ int main()
     SDL_Event e;
 
     bool quit = false;
-    int me = 0;
+
     while (quit == false)
     {
         
@@ -64,17 +89,6 @@ int main()
         ImGui::NewFrame();
 
 
-        ImGui::Begin("Window");
-
-        ImGui::InputInt("aaa", &me);
-        ImGui::Text("Hello World!");
-        ImTextureID bruhh = &me;
-        ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
-        ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
-        ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
-        ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
-        ImGui::Image(bruhh, ImVec2(100, 100), uv_min, uv_max, tint_col, border_col);
-        ImGui::End();
 
 
         ImGui::Render();
@@ -83,9 +97,9 @@ int main()
         glClearColor(0.2f, 0.2f, 0.2f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        game.gl.shader.SetInteger("image", gaming.glLoc);
         game.gl.shader.SetMatrix4("projection", game.gl.projection);
-        WdrawSprite(&game, &gaming.glLoc, glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 400.0f), sin(SDL_GetTicks() / 100.) * 100., glm::vec3(1.0f, 1.0f, 1.0f));
+
+        WdrawSprite(&game, &texture, glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 300.0f), sin(SDL_GetTicks() / 100.) * 100., glm::vec3(1.0f, 1.0f, 1.0f));
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(game.window);
     }
