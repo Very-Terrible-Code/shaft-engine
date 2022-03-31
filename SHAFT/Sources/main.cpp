@@ -1,14 +1,15 @@
 #include "shaft-engine.h"
 #include <glad/glad.h>
+
 #include <iostream>
-#include "render/stb_image.h"
+
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl.h"
 
-#define WinWidth 640
-#define WinHeight 480
+#define WinWidth 1280
+#define WinHeight 720
 
 int main()
 {
@@ -16,68 +17,68 @@ int main()
 
     initGame(&game, WinWidth, WinHeight);
 
+    initImGui(&game);
+
+
     // lua test
     script test;
     loadAndRunScript(&test, "rsc/test.lua");
     LuaRef s = getGlobalScr(&test, "testString");
     LuaRef n = getGlobalScr(&test, "number");
+    
     std::string luaString = s.cast<std::string>();
     int answer = n.cast<int>();
+
     std::cout << luaString << std::endl;
     std::cout << "And here's our number:" << answer << std::endl;
 
     // tex load
-    tex gaming = loadTexture("rsc/test.png", NOFLIP);
+    tex gaming = loadTexture("rsc/test.png", NOFLIPTEX);
     
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    io.ConfigWindowsMoveFromTitleBarOnly = true;
-
-    ImGui::StyleColorsDark();
-
-    ImGui_ImplSDL2_InitForOpenGL(game.window, game.context);
-    ImGui_ImplOpenGL3_Init();
 
 
-    SDL_Event e;
-
-    bool quit = false;
-
-    while (quit == false)
+    while (game.gameRunning)
     {
         
-        // Handle events on queue
-        while (SDL_PollEvent(&e) != 0)
-        {
-            ImGui_ImplSDL2_ProcessEvent(&e);
-            // User requests quit
-            if (e.type == SDL_QUIT)
-            {
-                quit = true;
-            }
+        processKeys(&game);
+
+        clearScreen();
+
+        ImGuiBeginRender(&game);
+
+        ImGui::Begin("Debug Menu");
+        if(ImGui::Button("Resize render to current window size")){
+            game.gl.projection = glm::ortho(0.0f, (float)game.winres.x, (float)game.winres.y, 0.0f, -1.0f, 1.0f);
         }
-
-
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame(game.window);
-        ImGui::NewFrame();
-
-
-
+        if(ImGui::Button("1280x720")){
+            SDL_SetWindowSize(game.window, 1280, 720);
+            glViewport(0, 0, 1280, 720);
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("1920x1080")){
+            SDL_SetWindowSize(game.window, 1920, 1080);
+            glViewport(0, 0, 1920, 1080);
+            
+        }
+        if(ImGui::Button("Fullscreen")){
+            SDL_SetWindowFullscreen(game.window, SDL_WINDOW_FULLSCREEN);
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Windowed")){
+            SDL_SetWindowFullscreen(game.window, 0);
+        }
+        ImGui::End();
+        
+        tex_IMGUIMENU(&game);
 
         ImGui::Render();
 
-        glViewport(0, 0, game.winw, game.winh);
-        glClearColor(0.2f, 0.2f, 0.2f, 0.f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
         game.gl.shader.SetMatrix4("projection", game.gl.projection);
-
-        WdrawSprite(&game, &gaming.glLoc, glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 300.0f), sin(SDL_GetTicks() / 100.) * 100., glm::vec3(1.0f, 1.0f, 1.0f));
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        
+        WdrawSprite(&game, &gaming.glLoc, glm::vec2(100. + sin(SDL_GetTicks() / 100.) * 100., 200.0f), glm::vec2(100.0f, 100.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        
+        ImGuiEndRender();
         SDL_GL_SwapWindow(game.window);
     }
 

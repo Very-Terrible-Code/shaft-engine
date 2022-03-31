@@ -2,8 +2,15 @@
 #include <fstream>
 #include "logic/math.h"
 
-typedef struct tile{
+typedef struct dectile{
     vec2 pos;
-    vec2 tex;
-}tile;
+    int tex;
+}dectile;
+
+typedef struct coltile{
+    vec2 pos;
+    int tex;
+}coltile;
+
+
 

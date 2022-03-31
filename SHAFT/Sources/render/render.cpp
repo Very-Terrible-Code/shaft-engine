@@ -8,7 +8,6 @@ void initRenderer(GAME *game)
 {
     unsigned int VBO;
     float vertices[] = {
-        // pos      // tex
         0.0f, 1.0f, 0.0f, 1.0f,
         1.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 0.0f,
@@ -16,7 +15,7 @@ void initRenderer(GAME *game)
         0.0f, 1.0f, 0.0f, 1.0f,
         1.0f, 1.0f, 1.0f, 1.0f,
         1.0f, 0.0f, 1.0f, 0.0f};
-    game->gl.projection = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
+    game->gl.projection = glm::ortho(0.0f, (float)game->winres.x, (float)game->winres.y, 0.0f, -1.0f, 1.0f);
     glGenVertexArrays(1, &game->gl.quadVAO);
     glGenBuffers(1, &VBO);
 
@@ -35,14 +34,14 @@ void ImGuiBeginRender(GAME* game)
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(game->window);
     ImGui::NewFrame();
-    ImGui::Render();
+
 }
 void ImGuiEndRender(){
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
-void clearScreen(GAME* game)
+void clearScreen()
 {
-    glViewport(0, 0, game->winw, game->winh);
+
     glClearColor(0.2f, 0.2f, 0.2f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 }

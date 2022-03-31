@@ -1,9 +1,12 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
+
 #include "logic/scripts.h"
 #include "logic/math.h"
 #include "render/shader.h"
+
+
 
 
 typedef struct keyStat
@@ -40,22 +43,42 @@ typedef struct openglSet
 
 } openglSet;
 
+typedef struct tex
+{
+    unsigned int glLoc;
+    char *location[64];
+    vec2i size;
+    int channeli;
+    bool loaded;
+} tex;
+
+
+typedef struct texdbheader{
+    int texsize;
+}texdbheader;
+
+typedef struct tagtex{
+    tex texture;
+    //int id;
+    char* tag[64];
+}tagtex;
+
+typedef struct texdb{
+    std::vector<tagtex> textures;
+    bool loadTexCheck;
+    char* sourcefile[64];
+}texdb;
+
 typedef struct GAME
 {
     SDL_Window *window;
     SDL_GLContext context;
     inHandle input;
-    int winw;
-    int winh;
+    texdb texm;
+    vec2i winres;
     openglSet gl;
     bool gameRunning;
 
 } GAME;
 
-typedef struct tex
-{
-    unsigned int glLoc;
-    char *location;
-    vec2i size;
-    int channeli;
-} tex;
+

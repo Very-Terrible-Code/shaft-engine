@@ -15,5 +15,8 @@ typedef struct script{
 
 
 void loadAndRunScript(script* pscript, const char* location);
+void initScript(script *pscript);
+
+void runScript(script* pscript, const char* location);
 
 LuaRef getGlobalScr(script * pscript, const char* var);

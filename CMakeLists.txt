@@ -11,7 +11,7 @@ find_package(Lua REQUIRED)
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror  -Wextra -Wpedantic -fomit-frame-pointer ")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Werror  -Wextra -Wpedantic -fomit-frame-pointer ")
     if(NOT WIN32)
         set(GLAD_LIBRARIES dl)
     endif()
@@ -29,7 +29,7 @@ include_directories(SHAFT/Headers/
                    
 file(GLOB VENDORS_SOURCES SHAFT/Vendor/glad/src/glad.c + SHAFT/ImGui/Sources/*)
 file(GLOB PROJECT_HEADERS SHAFT/Headers/*.h)
-file(GLOB PROJECT_SOURCES SHAFT/Sources/*.cpp + SHAFT/Sources/input/*.cpp + SHAFT/Sources/render/*.cpp + SHAFT/Sources/util/wm/*.cpp + SHAFT/Sources/logic/*.cpp)
+file(GLOB PROJECT_SOURCES SHAFT/Sources/*.cpp + SHAFT/Sources/textures/*.cpp + SHAFT/Sources/input/*.cpp + SHAFT/Sources/render/*.cpp + SHAFT/Sources/util/wm/*.cpp + SHAFT/Sources/logic/*.cpp)
 file(GLOB PROJECT_CONFIGS CMakeLists.txt
                           Readme.md
                          .gitattributes
