@@ -29,7 +29,7 @@ include_directories(SHAFT/Headers/
                    
 file(GLOB VENDORS_SOURCES SHAFT/Vendor/glad/src/glad.c + SHAFT/ImGui/Sources/*)
 file(GLOB PROJECT_HEADERS SHAFT/Headers/*.h)
-file(GLOB PROJECT_SOURCES SHAFT/Sources/*.cpp + SHAFT/Sources/textures/*.cpp + SHAFT/Sources/input/*.cpp + SHAFT/Sources/render/*.cpp + SHAFT/Sources/util/wm/*.cpp + SHAFT/Sources/logic/*.cpp)
+file(GLOB PROJECT_SOURCES SHAFT/Sources/*.cpp + SHAFT/Sources/game/*.cpp + SHAFT/Sources/textures/*.cpp + SHAFT/Sources/input/*.cpp + SHAFT/Sources/render/*.cpp + SHAFT/Sources/util/wm/*.cpp + SHAFT/Sources/logic/*.cpp)
 file(GLOB PROJECT_CONFIGS CMakeLists.txt
                           Readme.md
                          .gitattributes

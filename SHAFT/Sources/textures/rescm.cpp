@@ -41,7 +41,6 @@ tex loadTexture(const char *location, int flip)
 
 void loadTextureFromDB(tex *texturea)
 {
-    //printf("gaming: %s", (char*)texturea->location); fflush(NULL);
     glGenTextures(1, &texturea->glLoc);
     glBindTexture(GL_TEXTURE_2D, texturea->glLoc);
     

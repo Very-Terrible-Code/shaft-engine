@@ -7,6 +7,13 @@ typedef struct vec2
     float y;
 } vec2;
 
+typedef struct rot
+{
+    vec2 rot;
+    float angle;
+} rot;
+
+
 typedef struct vec3
 {
     float x;

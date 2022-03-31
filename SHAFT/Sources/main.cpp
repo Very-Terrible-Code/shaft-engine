@@ -30,9 +30,6 @@ int main()
     std::cout << luaString << std::endl;
     std::cout << "And here's our number:" << answer << std::endl;
 
-    // tex load
-    tex gaming = loadTexture("rsc/test.png", NOFLIPTEX);
-
     static unsigned int debugtex = 0;
     while (game.gameRunning)
     {
@@ -86,7 +83,6 @@ int main()
 
         game.gl.shader.SetMatrix4("projection", game.gl.projection);
 
-        WdrawSprite(&game, &gaming.glLoc, glm::vec2(100. + sin(SDL_GetTicks() / 100.) * 100., 200.0f), glm::vec2(100.0f, 100.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
         ImGuiEndRender();
         SDL_GL_SwapWindow(game.window);
