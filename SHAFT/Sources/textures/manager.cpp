@@ -48,9 +48,16 @@ void saveTextureDB(char *name, GAME *game)
 }
 
 void clearTEX(GAME *texdata){
-    for(int i = 0; i > (int)texdata->texm.textures.size(); i++)
+    for(int i = 0; i < (int)texdata->texm.textures.size(); i++){
         glDeleteTextures(1, &texdata->texm.textures[i].texture.glLoc);
+    }
     
+}
+void removeTEX(int item, GAME* texdata){
+    printf("GAMERS ONLINE:%i", texdata->texm.textures[item].texture.glLoc);
+    glDeleteTextures(1, &texdata->texm.textures[item].texture.glLoc);
+    texdata->texm.textures.erase(texdata->texm.textures.begin() + item);
+
 }
 
 void tex_IMGUIMENU(GAME *game)
@@ -75,7 +82,10 @@ void tex_IMGUIMENU(GAME *game)
                 ImGui::TreeNodeEx((char*)game->texm.textures[i].tag, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth);
                 if (ImGui::BeginPopupContextItem())
                 {
-                    ImGui::Text("Hello!");
+                    if(ImGui::Button("delete")){
+                        removeTEX(i, game);
+
+                    }
                     ImGui::EndPopup();
                 }
                 ImGui::TableNextColumn();
@@ -102,7 +112,7 @@ void tex_IMGUIMENU(GAME *game)
     static char tempoloc[64] = "";
     static char temponame[64] = "";
     static bool flip = 0;
-    static unsigned int debugtex = 0;
+    
     ImGui::InputTextWithHint("Texure Name", "Wooden Block", temponame, IM_ARRAYSIZE(temponame));
     ImGui::InputTextWithHint("Texure Location", "rsc/image.png", tempoloc, IM_ARRAYSIZE(tempoloc));
     ImGui::SameLine();
@@ -118,15 +128,7 @@ void tex_IMGUIMENU(GAME *game)
         }
     }
     ImGui::Separator();
-    if(ImGui::CollapsingHeader("Debug Texture Viewer")){
-        ImGui::InputInt("Texture Input", (int*)&debugtex);
-        ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
-        ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
-        ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
-        ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
-        ImGui::Image((void*)(intptr_t)debugtex, ImVec2(100, 100), uv_min, uv_max, tint_col, border_col);
-
-    }
+    
     ImGui::Separator();
     if(ImGui::Button("Save DB")){
         saveTextureDB((char*)"textures.tdb", game);

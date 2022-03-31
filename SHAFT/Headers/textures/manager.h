@@ -11,4 +11,6 @@ void saveTextureDB(char* name, GAME* texdata);
 
 void clearTEX(GAME* texdata);
 
+void removeTEX(int item, GAME* texdata);
+
 void tex_IMGUIMENU(GAME *game);
