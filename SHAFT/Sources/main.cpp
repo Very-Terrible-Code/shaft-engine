@@ -79,6 +79,8 @@ int main()
 
         tex_IMGUIMENU(&game);
 
+        map_IMGUIMENU(&game);
+
         ImGui::Render();
 
         game.gl.shader.SetMatrix4("projection", game.gl.projection);

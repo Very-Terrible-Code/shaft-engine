@@ -6,8 +6,41 @@
 #include "logic/math.h"
 #include "render/shader.h"
 
+#define S_DECTILE 0
+#define S_COLTILE 1
+#define S_COL 2
 
 
+typedef struct dectile
+{
+    vec2 pos;
+    vec2 scl;
+    rot rcl;
+    int tex;
+    script scr;
+} dectile, coltile;
+
+
+
+typedef struct col
+{
+    vec2 pos;
+    vec2 scl;
+    rot rcl;
+    script scr;
+} col;
+typedef struct drawOIT{
+    int type;
+    int id;
+}drawOIT;
+typedef struct map
+{
+    std::vector<dectile> decorationsTile;
+    std::vector<coltile> collisionTile;
+    std::vector<col> collision;
+    std::vector<drawOIT> drawOrder;
+    script globalscr;
+} map;
 
 typedef struct keyStat
 {
@@ -52,22 +85,24 @@ typedef struct tex
     bool loaded;
 } tex;
 
-
-typedef struct texdbheader{
+typedef struct texdbheader
+{
     int texsize;
-}texdbheader;
+} texdbheader;
 
-typedef struct tagtex{
+typedef struct tagtex
+{
     tex texture;
-    //int id;
-    char* tag[64];
-}tagtex;
+    // int id;
+    char *tag[64];
+} tagtex;
 
-typedef struct texdb{
+typedef struct texdb
+{
     std::vector<tagtex> textures;
     bool loadTexCheck;
-    char* sourcefile[64];
-}texdb;
+    char *sourcefile[64];
+} texdb;
 
 typedef struct GAME
 {
@@ -76,9 +111,8 @@ typedef struct GAME
     inHandle input;
     texdb texm;
     vec2i winres;
+    map cmap;
     openglSet gl;
     bool gameRunning;
 
 } GAME;
-
-

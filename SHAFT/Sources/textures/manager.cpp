@@ -13,7 +13,6 @@ void loadTextureDB(char *name, GAME *game)
     clearTEX(game);
     game->texm.textures.clear();
 
-    
     texdbheader fh;
 
     is.read(reinterpret_cast<char *>(&fh), sizeof(texdbheader));
