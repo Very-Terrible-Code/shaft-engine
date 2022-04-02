@@ -10,29 +10,27 @@
 #define S_COLTILE 1
 #define S_COL 2
 
-
 typedef struct dectile
 {
     vec2 pos;
     vec2 scl;
-    rot rcl;
+    float rot;
     int tex;
     script scr;
 } dectile, coltile;
-
-
 
 typedef struct col
 {
     vec2 pos;
     vec2 scl;
-    rot rcl;
+    float rot;
     script scr;
 } col;
-typedef struct drawOIT{
+typedef struct drawOIT
+{
     int type;
     int id;
-}drawOIT;
+} drawOIT;
 typedef struct map
 {
     std::vector<dectile> decorationsTile;

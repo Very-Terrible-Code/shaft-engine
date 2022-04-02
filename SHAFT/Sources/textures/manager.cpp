@@ -8,28 +8,31 @@
 void loadTextureDB(char *name, GAME *game)
 {
     std::ifstream is(name, std::ifstream::binary);
-    if(is){
-    game->texm.loadTexCheck = true;
-    clearTEX(game);
-    game->texm.textures.clear();
-
-    texdbheader fh;
-
-    is.read(reinterpret_cast<char *>(&fh), sizeof(texdbheader));
-
-    game->texm.textures.resize(fh.texsize);
-
-    is.read(reinterpret_cast<char *>(game->texm.textures.data()), fh.texsize * sizeof(tagtex));
-
-    is.close();
-
-    for (int i = 0; i < (int)game->texm.textures.size(); i++)
+    if (is)
     {
-        loadTextureFromDB(&game->texm.textures[i].texture);
-    }
+        game->texm.loadTexCheck = true;
+        clearTEX(game);
+        game->texm.textures.clear();
 
-    game->texm.loadTexCheck = false;
-    }else{
+        texdbheader fh;
+
+        is.read(reinterpret_cast<char *>(&fh), sizeof(texdbheader));
+
+        game->texm.textures.resize(fh.texsize);
+
+        is.read(reinterpret_cast<char *>(game->texm.textures.data()), fh.texsize * sizeof(tagtex));
+
+        is.close();
+
+        for (int i = 0; i < (int)game->texm.textures.size(); i++)
+        {
+            loadTextureFromDB(&game->texm.textures[i].texture);
+        }
+
+        game->texm.loadTexCheck = false;
+    }
+    else
+    {
         is.close();
     }
 }
@@ -38,16 +41,19 @@ void saveTextureDB(char *name, GAME *game)
 {
     std::ofstream savedata;
     savedata.open(name, std::ofstream::binary);
-    if(savedata){
-    texdbheader fh;
-    fh.texsize = (int)game->texm.textures.size();
+    if (savedata)
+    {
+        texdbheader fh;
+        fh.texsize = (int)game->texm.textures.size();
 
-    savedata.write(reinterpret_cast<char *>(&fh),
-                   sizeof(texdbheader));
-    savedata.write(reinterpret_cast<char *>(&game->texm.textures[0]),
-                   sizeof(tagtex) * game->texm.textures.size());
-    savedata.close();
-    }else{
+        savedata.write(reinterpret_cast<char *>(&fh),
+                       sizeof(texdbheader));
+        savedata.write(reinterpret_cast<char *>(&game->texm.textures[0]),
+                       sizeof(tagtex) * game->texm.textures.size());
+        savedata.close();
+    }
+    else
+    {
         savedata.close();
     }
 }
@@ -132,7 +138,7 @@ void tex_IMGUIMENU(GAME *game)
         {
             tagtex texture;
             texture.texture = btexture;
-            //texture.tag = (char *)malloc((strlen(temponame) + 1) * sizeof(char));
+            // texture.tag = (char *)malloc((strlen(temponame) + 1) * sizeof(char));
             memcpy(texture.tag, temponame, strlen(temponame) + 1);
             game->texm.textures.push_back(texture);
         }
@@ -174,3 +180,4 @@ void tex_IMGUIMENU(GAME *game)
 
     ImGui::End();
 }
+
