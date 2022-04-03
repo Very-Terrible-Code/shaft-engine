@@ -29,14 +29,14 @@ void initRenderer(GAME *game)
     glBindVertexArray(0);
 }
 
-void ImGuiBeginRender(GAME* game)
+void ImGuiBeginRender(GAME *game)
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(game->window);
     ImGui::NewFrame();
-
 }
-void ImGuiEndRender(){
+void ImGuiEndRender()
+{
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 void clearScreen()
@@ -45,10 +45,26 @@ void clearScreen()
     glClearColor(0.2f, 0.2f, 0.2f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
-
-void WdrawSprite(GAME *game, GLuint *texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
+void renderScene(GAME *game)
+{
+    for (int i = 0; i < (int)game->cmap.drawOrder.size(); i++)
+    {
+        switch (game->cmap.drawOrder[i].type)
+        {
+        case S_DECTILE:
+        {
+            raw_drawSP(game,  (GLuint*)&game->texm.textures[game->cmap.decorationsTile[game->cmap.drawOrder[i].id].tex].texture.glLoc, 
+                                       vec2toGLM(game->cmap.decorationsTile[game->cmap.drawOrder[i].id].pos), 
+                                       vec2toGLM(game->cmap.decorationsTile[game->cmap.drawOrder[i].id].scl), 
+                                       game->cmap.decorationsTile[game->cmap.drawOrder[i].id].rot, glm::vec3(1));
+        }
+        }
+    }
+}
+void raw_drawSP(GAME *game, GLuint *texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
 {
     // prepare transformations
+    
     game->gl.shader.Use();
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position, 0.0f));

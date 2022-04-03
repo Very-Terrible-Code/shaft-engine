@@ -17,6 +17,7 @@ typedef struct dectile
     float rot;
     int tex;
     script scr;
+    char *tag[32];
 } dectile, coltile;
 
 typedef struct col
@@ -25,6 +26,7 @@ typedef struct col
     vec2 scl;
     float rot;
     script scr;
+    char *tag[32];
 } col;
 typedef struct drawOIT
 {
@@ -50,7 +52,7 @@ typedef struct keyStat
 typedef struct key
 {
     unsigned int key;
-    char *tag;
+    char *tag[32];
     keyStat status;
 } key;
 

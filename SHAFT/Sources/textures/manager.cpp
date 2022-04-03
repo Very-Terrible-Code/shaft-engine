@@ -107,10 +107,10 @@ void tex_IMGUIMENU(GAME *game)
                 ImGui::Text("%dx%d", game->texm.textures[i].texture.size.x, game->texm.textures[i].texture.size.y);
                 ImGui::TableNextColumn();
 
-                ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
-                ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
-                ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
-                ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+                ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 
+                ImVec2 uv_max = ImVec2(1.0f, 1.0f);                
+                ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);  
+                ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); 
                 ImGui::Image((void *)(intptr_t)game->texm.textures[i].texture.glLoc, ImVec2(100, 100), uv_min, uv_max, tint_col, border_col);
             }
 

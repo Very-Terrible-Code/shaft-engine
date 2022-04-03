@@ -38,6 +38,8 @@ int main()
 
         clearScreen();
 
+        renderScene(&game);
+
         ImGuiBeginRender(&game);
 
         ImGui::Begin("Debug Menu");

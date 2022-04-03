@@ -15,34 +15,54 @@ void saveMAP(char *name, GAME *game)
     game = game;
 }
 
-void map_eCOL_IMGUIMENU(GAME *game, dectile *dct)
+void map_eCOL_IMGUIMENU(GAME *game)
 {
     if (game->texm.textures.size())
     {
-        static float *pos[2] = {&dct->pos.x, &dct->pos.y};
-        static float *scl[2] = {&dct->scl.x, &dct->scl.y};
-        static unsigned int tex = 0;
-        game = game;
-        ImGui::InputFloat2("Position", *pos, "%.3f units");
-        ImGui::InputFloat2("Scale", *scl, "%.3f units");
-        ImGui::InputFloat("Rotation", &dct->rot, 0., 0., "%.3f degrees");
-        ImGui::InputInt("Texture ID:", (int *)&tex, 0., 0.);
-        if (tex == (unsigned int)game->texm.textures.size())
+        static dectile dct;
+        static float pos[2] = {dct.pos.x, dct.pos.y};
+        static float scl[2] = {dct.scl.x, dct.scl.y};
+        static int tex = 0;
+        static char tag[32];
+        ImGui::InputText("Name", (char*)tag, IM_ARRAYSIZE(tag));
+        ImGui::InputFloat2("Position", pos, "%.3f units");
+        ImGui::InputFloat2("Scale", scl, "%.3f units");
+        ImGui::InputFloat("Rotation", &dct.rot, 0.1, 0.15, "%.3f degrees");
+        ImGui::InputInt("Texture ID:", (int*)&tex);
+        if (tex > (int)game->texm.textures.size() - 1)
         {
             tex--;
         }
+        if ((int)tex < 0)
+        {
+            tex++;
+        }
         ImVec2 oldP = ImGui::GetCursorPos();
         ImGui::SameLine();
-        ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
-        ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
-        ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
-        ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+        ImVec2 uv_min = ImVec2(0.0f, 0.0f);                
+        ImVec2 uv_max = ImVec2(1.0f, 1.0f);                
+        ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);  
+        ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); 
         ImGui::SetCursorPos(ImVec2{ImGui::GetCursorPosX(), ImGui::GetCursorPosY() - 70});
         ImGui::Image((void *)(intptr_t)game->texm.textures[tex].texture.glLoc, ImVec2(100, 100), uv_min, uv_max, tint_col, border_col);
         ImGui::SetCursorPos(oldP);
 
         if (ImGui::Button("Add"))
         {
+            dectile base;
+            drawOIT drawo;
+            base.pos.x = pos[0];
+            base.pos.y = pos[1];
+            base.scl.x = scl[0];
+            base.scl.y = scl[1];
+            base.rot = dct.rot;
+            base.tex = (unsigned int)tex;
+            memcpy(&base.tag, tag, strlen(tag) + 1);
+            game->cmap.decorationsTile.push_back(base);
+            drawo.id = (int)game->cmap.decorationsTile.size() - 1;
+            fflush(NULL);
+            drawo.type = S_DECTILE;
+            game->cmap.drawOrder.push_back(drawo);
         }
     }
     else
@@ -64,17 +84,13 @@ void map_IMGUIMENU(GAME *game)
         if (ImGui::BeginTabItem("Add to Scene"))
         {
             static int itemsel;
-            static dectile dct;
-            static coltile cct;
-            static col ct;
-            ct = ct;
-            cct = cct;
-            dct = dct;
+            
+
             ImGui::Combo("Type", &itemsel, items, IM_ARRAYSIZE(items));
             switch (itemsel)
             {
             case 0:
-                map_eCOL_IMGUIMENU(game, &dct);
+                map_eCOL_IMGUIMENU(game);
                 break;
             }
             ImGui::EndTabItem();
@@ -83,7 +99,23 @@ void map_IMGUIMENU(GAME *game)
         {
             for (int i = 0; i < (int)game->cmap.drawOrder.size(); i++)
             {
-                ImGui::Text("ANUS!!!!1!");
+                ImGui::Text("Type: %i", game->cmap.drawOrder[i].type);
+                switch (game->cmap.drawOrder[i].type)
+                {
+                case S_DECTILE:
+                {
+                    ImVec2 uv_min = ImVec2(0.0f, 0.0f);                
+                    ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 
+                    ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   
+                    ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+                    ImGui::Image((void *)(intptr_t)game->texm.textures[game->cmap.decorationsTile[game->cmap.drawOrder[i].id].tex].texture.glLoc, ImVec2(50, 50), uv_min, uv_max, tint_col, border_col);
+                    
+                    ImGui::SameLine();
+                    ImGui::Text((char*)game->cmap.decorationsTile[game->cmap.drawOrder[i].id].tag);
+                    ImGui::Text("HEY FUCKER: %i",  game->texm.textures[game->cmap.decorationsTile[game->cmap.drawOrder[i].id].tex].texture.glLoc);
+                    break;
+                }
+                }
             }
             ImGui::EndTabItem();
         }
