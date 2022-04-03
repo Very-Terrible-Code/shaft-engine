@@ -1,11 +1,7 @@
 #include "render/render.h"
 #include "logic/math.h"
 #include "common.h"
-#ifdef ENABLE_EDITOR
-#include "imgui.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui_impl_sdl.h"
-#endif
+
 
 void initRenderer(GAME *game)
 {
@@ -31,19 +27,7 @@ void initRenderer(GAME *game)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
-#ifdef ENABLE_EDITOR
-void ImGuiBeginRender(GAME *game)
-{
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame(game->window);
-    ImGui::NewFrame();
-}
-void ImGuiEndRender()
-{
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-#endif
+
 void clearScreen()
 {
 

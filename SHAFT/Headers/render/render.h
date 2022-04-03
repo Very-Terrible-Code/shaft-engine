@@ -1,6 +1,5 @@
 #pragma once
 #include "common.h"
-
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -12,9 +11,3 @@ void raw_drawSP(GAME *game, GLuint *texture, glm::vec2 position,  glm::vec2 size
 void clearScreen();
 
 void renderScene(GAME* render);
-
-#ifdef ENABLE_EDITOR
-void ImGuiBeginRender(GAME* render);
-
-void ImGuiEndRender();
-#endif

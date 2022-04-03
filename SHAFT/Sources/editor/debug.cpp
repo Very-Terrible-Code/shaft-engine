@@ -40,3 +40,15 @@ void sh_debugMenu(GAME *game)
     }
     ImGui::End();
 }
+
+void ImGuiBeginRender(GAME *game)
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame(game->window);
+    ImGui::NewFrame();
+}
+void ImGuiEndRender()
+{
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}

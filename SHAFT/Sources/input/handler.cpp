@@ -1,16 +1,17 @@
 #include "input/handler.h"
-#ifdef ENABLE_EDITOR
+//#ifdef ENABLE_EDITOR
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl.h"
-#endif
+//#endif
+
 void processKeys(GAME *game)
 {
     while (SDL_PollEvent(&game->input.inps) != 0)
     {
-#ifdef ENABLE_EDITOR
+//#ifdef ENABLE_EDITOR
         ImGui_ImplSDL2_ProcessEvent(&game->input.inps);
-#endif
+//#endif
         if (game->input.inps.type == SDL_QUIT)
         {
             game->gameRunning = false;

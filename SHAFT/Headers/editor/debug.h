@@ -6,3 +6,7 @@
 
 
 void sh_debugMenu(GAME *game);
+
+void ImGuiBeginRender(GAME* render);
+
+void ImGuiEndRender();
