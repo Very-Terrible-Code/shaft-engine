@@ -8,6 +8,12 @@
 #include "input/handler.h"
 #include "game/map.h"
 
+#ifdef ENABLE_EDITOR
+#include "editor/debug.h"
+#include "editor/mapedit.h"
+#include "editor/texedit.h"
+#endif
+
 
 void initGame(GAME *instance, int width, int height);
 

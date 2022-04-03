@@ -29,8 +29,6 @@ void Shader::Compile(const char *vertexSource, const char *fragmentSource)
     checkCompileErrors(this->ID, "PROGRAM");
     glDeleteShader(sVertex);
     glDeleteShader(sFragment);
-    
-   
 }
 
 void Shader::SetFloat(const char *name, float value, bool useShader)

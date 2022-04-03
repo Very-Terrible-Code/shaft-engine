@@ -6,6 +6,11 @@ glm::vec2 vec2toGLM(vec2 input)
     return glm::vec2(input.x, input.y);
 }
 
+glm::vec2 vec2itoGLM(vec2i input)
+{
+    return glm::vec2(input.x, input.y);
+}
+
 vec2 glmToVec2(glm::vec2 input)
 {
     return vec2{input.x, input.y};
