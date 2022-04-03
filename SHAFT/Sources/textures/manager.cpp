@@ -78,10 +78,12 @@ void tex_IMGUIMENU(GAME *game)
     static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
     if (!game->texm.loadTexCheck)
     {
-        if (ImGui::BeginTable("3ways", 4, flags))
+        if (ImGui::BeginTable("texd", 5, flags))
         {
-            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
             const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
+
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
+            ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 12.0f);
             ImGui::TableSetupColumn("Location", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 12.0f);
             ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 18.0f);
             ImGui::TableSetupColumn("Preview", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 18.0f);
@@ -100,6 +102,8 @@ void tex_IMGUIMENU(GAME *game)
                     ImGui::EndPopup();
                 }
                 ImGui::TableNextColumn();
+                ImGui::Text("ID:%i", i);
+                ImGui::TableNextColumn();
                 ImGui::Text((char *)game->texm.textures[i].texture.location);
                 ImGui::NewLine();
                 ImGui::Text("OpenGL Loaction:%i", game->texm.textures[i].texture.glLoc);
@@ -107,10 +111,10 @@ void tex_IMGUIMENU(GAME *game)
                 ImGui::Text("%dx%d", game->texm.textures[i].texture.size.x, game->texm.textures[i].texture.size.y);
                 ImGui::TableNextColumn();
 
-                ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 
-                ImVec2 uv_max = ImVec2(1.0f, 1.0f);                
-                ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);  
-                ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); 
+                ImVec2 uv_min = ImVec2(0.0f, 0.0f);
+                ImVec2 uv_max = ImVec2(1.0f, 1.0f);
+                ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+                ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f);
                 ImGui::Image((void *)(intptr_t)game->texm.textures[i].texture.glLoc, ImVec2(100, 100), uv_min, uv_max, tint_col, border_col);
             }
 
@@ -180,4 +184,3 @@ void tex_IMGUIMENU(GAME *game)
 
     ImGui::End();
 }
-

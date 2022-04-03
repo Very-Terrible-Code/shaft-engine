@@ -18,6 +18,7 @@ typedef struct dectile
     int tex;
     script scr;
     char *tag[32];
+    int attc;
 } dectile, coltile;
 
 typedef struct col
@@ -27,6 +28,7 @@ typedef struct col
     float rot;
     script scr;
     char *tag[32];
+    int attc;
 } col;
 typedef struct drawOIT
 {
