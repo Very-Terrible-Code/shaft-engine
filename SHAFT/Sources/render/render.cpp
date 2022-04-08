@@ -2,7 +2,6 @@
 #include "logic/math.h"
 #include "common.h"
 
-
 void initRenderer(GAME *game)
 {
     unsigned int VBO;
@@ -37,6 +36,7 @@ void clearScreen()
 void renderScene(GAME *game)
 {
     game->gl.shader.SetMatrix4("projection", game->gl.projection);
+
     for (int i = 0; i < (int)game->cmap.drawOrder.size(); i++)
     {
         switch (game->cmap.drawOrder[i].type)
@@ -47,9 +47,20 @@ void renderScene(GAME *game)
                        vec2toGLM(game->cmap.decorationsTile[game->cmap.drawOrder[i].id].pos),
                        vec2toGLM(game->cmap.decorationsTile[game->cmap.drawOrder[i].id].scl),
                        game->cmap.decorationsTile[game->cmap.drawOrder[i].id].rot, glm::vec3(1));
+            break;
+        }
+        case S_COLTILE:
+        {
+            raw_drawSP(game, (GLuint *)&game->texm.textures[game->cmap.collisionTile[game->cmap.drawOrder[i].id].tex].texture.glLoc,
+                       vec2toGLM(game->cmap.collisionTile[game->cmap.drawOrder[i].id].pos),
+                       vec2toGLM(game->cmap.collisionTile[game->cmap.drawOrder[i].id].scl),
+                       game->cmap.collisionTile[game->cmap.drawOrder[i].id].rot, glm::vec3(1));
+            break;
         }
         }
     }
+
+    
 }
 void raw_drawSP(GAME *game, GLuint *texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
 {
@@ -73,3 +84,27 @@ void raw_drawSP(GAME *game, GLuint *texture, glm::vec2 position, glm::vec2 size,
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 }
+//#ifdef ENABLE_EDITOR
+void raw_drawBP(GAME *game, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
+{
+    
+    game->debugBLOCK.Use();
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(position, 0.0f));
+    model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f));
+    model = glm::rotate(model, glm::radians(rotate), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f));
+
+    model = glm::scale(model, glm::vec3(size, 1.0f));
+
+    game->debugBLOCK.SetMatrix4("projection", game->gl.projection);
+    game->debugBLOCK.SetMatrix4("model", model);
+    game->debugBLOCK.SetVector3f("icolor", color);
+
+
+    glBindVertexArray(game->gl.quadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    game->gl.shader.Use();
+}
+//#endif

@@ -1,6 +1,6 @@
 #define ENABLE_EDITOR
 #include "shaft-engine.h"
-
+#include "editor/debug.h"
 #include <glad/glad.h>
 
 #include <iostream>
@@ -37,8 +37,13 @@ int main()
 
         clearScreen();
 
+        
+        
         renderScene(&game);
+        raw_drawBP(&game, glm::vec2(1.,1.), glm::vec2(100.,100.), 0., glm::vec3(1., 0., 0.));
+    
 #ifdef ENABLE_EDITOR
+
         ImGuiBeginRender(&game);
 
         sh_debugMenu(&game);
@@ -46,9 +51,14 @@ int main()
         tex_IMGUIMENU(&game);
 
         map_IMGUIMENU(&game);
+        
 
         ImGuiEndRender();
+        
 #endif
+
+        
+    
 
         SDL_GL_SwapWindow(game.window);
     }

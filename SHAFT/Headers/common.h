@@ -116,5 +116,7 @@ typedef struct GAME
     map cmap;
     openglSet gl;
     bool gameRunning;
-
+//#ifdef ENABLE_EDITOR
+    Shader debugBLOCK;
+//#endif
 } GAME;

@@ -32,23 +32,24 @@ void initGame(GAME *instance, int width, int height)
         SDL_Log("SDL_Init Error: %s\n", SDL_GetError());
         exit(0);
     }
-    instance->window = SDL_CreateWindow("SHAFT", 0, 0, width, height, SDL_WINDOW_OPENGL 
-    + SDL_WINDOW_RESIZABLE);
+    instance->window = SDL_CreateWindow("SHAFT", 0, 0, width, height, SDL_WINDOW_OPENGL + SDL_WINDOW_RESIZABLE);
     instance->context = SDL_GL_CreateContext(instance->window);
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
     SDL_GL_SetSwapInterval(1);
     instance->winres.x = width;
     instance->winres.y = height;
     instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/texc.frag").c_str());
-    
+//#ifdef ENABLE_EDITOR
+    instance->debugBLOCK.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/rawcol.frag").c_str());
+//#endif
     initRenderer(instance);
     instance->gameRunning = true;
     glViewport(0, 0, instance->winres.x, instance->winres.y);
     return;
 }
 
-
-void initImGui(GAME* game){
+void initImGui(GAME *game)
+{
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
@@ -60,4 +61,3 @@ void initImGui(GAME* game){
     ImGui_ImplSDL2_InitForOpenGL(game->window, game->context);
     ImGui_ImplOpenGL3_Init();
 }
-
