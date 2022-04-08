@@ -37,11 +37,8 @@ int main()
 
         clearScreen();
 
-        
-        
         renderScene(&game);
-        raw_drawBP(&game, glm::vec2(1.,1.), glm::vec2(100.,100.), 0., glm::vec3(1., 0., 0.));
-    
+        
 #ifdef ENABLE_EDITOR
 
         ImGuiBeginRender(&game);

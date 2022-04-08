@@ -38,6 +38,6 @@ typedef struct rect
 glm::vec2 vec2toGLM(vec2 input);
 glm::vec2 vec2itoGLM(vec2i input);
 vec2 glmToVec2(glm::vec2 input);
-
+vec2 vec2itoVec2(vec2i input);
 glm::vec3 vec3toGLM(vec3 input);
 vec3 glmToVec3(glm::vec3 input);

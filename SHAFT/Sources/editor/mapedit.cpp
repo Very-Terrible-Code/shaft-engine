@@ -1,5 +1,6 @@
 #include "editor/debug.h"
 #include "editor/mapedit.h"
+#include "render/render.h"
 
 void map_eCOL_IMGUIMENU(GAME *game)
 {
@@ -7,7 +8,7 @@ void map_eCOL_IMGUIMENU(GAME *game)
     {
         static dectile dct;
         dct.scl.x = 100;
-        
+
         dct.scl.y = 100;
         static float pos[2] = {dct.pos.x, dct.pos.y};
         static float scl[2] = {dct.scl.x, dct.scl.y};
@@ -47,7 +48,7 @@ void map_eCOL_IMGUIMENU(GAME *game)
             base.rot = dct.rot;
             base.attc = -1;
             base.scr.impl = NULL;
-            
+
             base.tex = (unsigned int)tex;
             memcpy(&base.tag, tag, strlen(tag) + 1);
             game->cmap.decorationsTile.push_back(base);
@@ -93,15 +94,94 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id)
     }
 }
 
+void map_dragOBJ(GAME *game, drawOIT *item)
+{
+    
+    if (!ImGui::IsKeyDown(ImGuiKey_LeftShift))
+    {
+        if (game->cmap.drawOrder.size())
+        {
+            switch (item->type)
+            {
+            case S_DECTILE:
+            {
+                vec2 midpoint = game->cmap.decorationsTile[item->id].pos;
+                midpoint.x = midpoint.x + (game->cmap.decorationsTile[item->id].scl.x / 2.);
+                midpoint.y = midpoint.y + (game->cmap.decorationsTile[item->id].scl.y / 2.);
+                raw_drawBP(game, vec2toGLM(midpoint), glm::vec2(10., 10.), 0., glm::vec3(1., 1., 1.));
+                raw_drawBP(game, glm::vec2(midpoint.x, midpoint.y - 20), glm::vec2(10., 10.), 0., glm::vec3(1., 0., 0.));
+                raw_drawBP(game, glm::vec2(midpoint.x - 20, midpoint.y), glm::vec2(10., 10.), 0., glm::vec3(0., 1., 0.));
+
+                //HELL TIME
+                vec2i mouse;
+                SDL_GetMouseState(&mouse.x, &mouse.y);
+                raw_drawBP(game, vec2itoGLM(mouse), glm::vec2(4., 4.), 0., glm::vec3(1., 1., 1.));
+                SDL_Rect phf = {mouse.x, mouse.y, 4, 4};
+                SDL_Rect sax = {(int)midpoint.x, (int)midpoint.y, 10, 10};
+                if (SDL_HasIntersection(&sax, &phf))
+                {
+
+                    if (ImGui::IsMouseDown(0))
+                    {
+                        vec2 br = vec2itoVec2(mouse);
+                        br.x -= (game->cmap.decorationsTile[item->id].scl.x / 2.);
+                        br.y -= (game->cmap.decorationsTile[item->id].scl.y / 2.);
+                        game->cmap.decorationsTile[item->id].pos = br;
+                    }
+                }
+
+                sax = {(int)midpoint.x, (int)midpoint.y - 20, 10, 10};
+                if (SDL_HasIntersection(&sax, &phf))
+                {
+
+                    if (ImGui::IsMouseDown(0))
+                    {
+                        vec2 br = vec2itoVec2(mouse);
+                        br.y -= (game->cmap.decorationsTile[item->id].scl.y / 2.);
+                        br.y += 20;
+                        br.x = game->cmap.decorationsTile[item->id].pos.x;
+                        game->cmap.decorationsTile[item->id].pos = br;
+                    }
+                }
+
+                sax = {(int)midpoint.x - 20, (int)midpoint.y, 10, 10};
+                if (SDL_HasIntersection(&sax, &phf))
+                {
+
+                    if (ImGui::IsMouseDown(0))
+                    {
+                        vec2 br = vec2itoVec2(mouse);
+                        br.x -= (game->cmap.decorationsTile[item->id].scl.x / 2.);
+                        br.x += 20;
+                        br.y = game->cmap.decorationsTile[item->id].pos.y;
+                        game->cmap.decorationsTile[item->id].pos = br;
+                    }
+                }
+
+
+
+
+
+
+
+
+                break;
+            }
+            }
+        }
+    }
+}
+
 void map_IMGUIMENU(GAME *game)
 {
 
     static char *items[] = {(char *)"Decoration Tile", (char *)"Collision Tile", (char *)"Collision Box"};
     static int selEDMOD = S_DECTILE;
     static drawOIT selectedItem = {0, 0};
+    map_dragOBJ(game, &selectedItem);
     if (ImGui::IsKeyDown(ImGuiKey_LeftShift))
     {
-        
+
         if (ImGui::IsMouseClicked(0))
         {
             if (!ImGui::IsAnyItemFocused())
@@ -159,7 +239,7 @@ void map_IMGUIMENU(GAME *game)
     }
 
     ImGui::Begin("MapEditor");
-    ImGui::Text("Gaming - %i, %i", selectedItem.type, selectedItem.id);
+    ImGui::Text("Selected Object - %i, %i", selectedItem.type, selectedItem.id);
     ImGui::Combo("Select type", &selEDMOD, items, IM_ARRAYSIZE(items));
     if (ImGui::BeginTabBar("Map Editor"))
     {
