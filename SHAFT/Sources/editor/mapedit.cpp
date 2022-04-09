@@ -94,9 +94,11 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id)
     }
 }
 
-void map_dragOBJ(GAME *game, drawOIT *item)
+void map_dragOBJ(GAME *game, drawOIT *item, bool axis)
 {
-    
+    axis = axis;
+    static bool held = false;
+    static int brad = 0;
     if (!ImGui::IsKeyDown(ImGuiKey_LeftShift))
     {
         if (game->cmap.drawOrder.size())
@@ -115,55 +117,105 @@ void map_dragOBJ(GAME *game, drawOIT *item)
                 //HELL TIME
                 vec2i mouse;
                 SDL_GetMouseState(&mouse.x, &mouse.y);
-                raw_drawBP(game, vec2itoGLM(mouse), glm::vec2(4., 4.), 0., glm::vec3(1., 1., 1.));
-                SDL_Rect phf = {mouse.x, mouse.y, 4, 4};
+                raw_drawBP(game, vec2itoGLM(mouse), glm::vec2(8., 8.), 0., glm::vec3(1., 1., 1.));
+                SDL_Rect phf = {mouse.x, mouse.y, 8, 8};
                 SDL_Rect sax = {(int)midpoint.x, (int)midpoint.y, 10, 10};
-                if (SDL_HasIntersection(&sax, &phf))
+                if (!held)
                 {
-
-                    if (ImGui::IsMouseDown(0))
+                    if (SDL_HasIntersection(&sax, &phf))
                     {
-                        vec2 br = vec2itoVec2(mouse);
-                        br.x -= (game->cmap.decorationsTile[item->id].scl.x / 2.);
-                        br.y -= (game->cmap.decorationsTile[item->id].scl.y / 2.);
-                        game->cmap.decorationsTile[item->id].pos = br;
+
+                        if (ImGui::IsMouseDown(0))
+                        {
+                            brad = 0;
+                            held = true;
+                        }
+                    }
+
+                    sax = {(int)midpoint.x, (int)midpoint.y - 20, 10, 10};
+                    if (SDL_HasIntersection(&sax, &phf))
+                    {
+
+                        if (ImGui::IsMouseDown(0))
+                        {
+                            brad = 1;
+                            held = true;
+                        }
+                    }
+
+                    sax = {(int)midpoint.x - 20, (int)midpoint.y, 10, 10};
+                    if (SDL_HasIntersection(&sax, &phf))
+                    {
+
+                        if (ImGui::IsMouseDown(0))
+                        {
+                            brad = 2;
+                            held = true;
+                        }
                     }
                 }
-
-                sax = {(int)midpoint.x, (int)midpoint.y - 20, 10, 10};
-                if (SDL_HasIntersection(&sax, &phf))
+                else
                 {
-
-                    if (ImGui::IsMouseDown(0))
+                    vec2 br = vec2itoVec2(mouse);
+                    if (!axis)
                     {
-                        vec2 br = vec2itoVec2(mouse);
-                        br.y -= (game->cmap.decorationsTile[item->id].scl.y / 2.);
-                        br.y += 20;
-                        br.x = game->cmap.decorationsTile[item->id].pos.x;
-                        game->cmap.decorationsTile[item->id].pos = br;
+                        switch (brad)
+                        {
+                        case 0:
+
+                            br.x -= (game->cmap.decorationsTile[item->id].scl.x / 2.);
+                            br.y -= (game->cmap.decorationsTile[item->id].scl.y / 2.);
+                            game->cmap.decorationsTile[item->id].pos = br;
+                            break;
+                        case 1:
+                            br.y -= (game->cmap.decorationsTile[item->id].scl.y / 2.);
+                            br.y += 20;
+                            br.x = game->cmap.decorationsTile[item->id].pos.x;
+                            game->cmap.decorationsTile[item->id].pos = br;
+                            break;
+                        case 2:
+                            br.x -= (game->cmap.decorationsTile[item->id].scl.x / 2.);
+                            br.x += 20;
+                            br.y = game->cmap.decorationsTile[item->id].pos.y;
+                            game->cmap.decorationsTile[item->id].pos = br;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        switch (brad)
+                        {
+                        case 1:
+                            sax = {(int)game->cmap.decorationsTile[item->id].pos.x, (int)game->cmap.decorationsTile[item->id].pos.y + (int)game->cmap.decorationsTile[item->id].scl.y, (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].scl.y};
+                            if (SDL_HasIntersection(&sax, &phf))
+                            {
+                                game->cmap.decorationsTile[item->id].pos.y += game->cmap.decorationsTile[item->id].scl.y;
+                            }
+                            sax = {(int)game->cmap.decorationsTile[item->id].pos.x, (int)game->cmap.decorationsTile[item->id].pos.y - (int)game->cmap.decorationsTile[item->id].scl.y, (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].scl.y};
+                            if (SDL_HasIntersection(&sax, &phf))
+                            {
+                                game->cmap.decorationsTile[item->id].pos.y -= game->cmap.decorationsTile[item->id].scl.y;
+                            }
+                            break;
+                        case 2:
+                            sax = {(int)game->cmap.decorationsTile[item->id].pos.x + (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].pos.y , (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].scl.y};
+                            if (SDL_HasIntersection(&sax, &phf))
+                            {
+                                game->cmap.decorationsTile[item->id].pos.x += game->cmap.decorationsTile[item->id].scl.x;
+                            }
+                            sax = {(int)game->cmap.decorationsTile[item->id].pos.x - (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].pos.y, (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].scl.y};
+                            if (SDL_HasIntersection(&sax, &phf))
+                            {
+                                game->cmap.decorationsTile[item->id].pos.x -= game->cmap.decorationsTile[item->id].scl.x;
+                            }
+                            break;
+                        }
+                    }
+                    if (ImGui::IsMouseReleased(0))
+                    {
+                        held = false;
                     }
                 }
-
-                sax = {(int)midpoint.x - 20, (int)midpoint.y, 10, 10};
-                if (SDL_HasIntersection(&sax, &phf))
-                {
-
-                    if (ImGui::IsMouseDown(0))
-                    {
-                        vec2 br = vec2itoVec2(mouse);
-                        br.x -= (game->cmap.decorationsTile[item->id].scl.x / 2.);
-                        br.x += 20;
-                        br.y = game->cmap.decorationsTile[item->id].pos.y;
-                        game->cmap.decorationsTile[item->id].pos = br;
-                    }
-                }
-
-
-
-
-
-
-
 
                 break;
             }
@@ -177,8 +229,9 @@ void map_IMGUIMENU(GAME *game)
 
     static char *items[] = {(char *)"Decoration Tile", (char *)"Collision Tile", (char *)"Collision Box"};
     static int selEDMOD = S_DECTILE;
+    static bool axise = 1;
     static drawOIT selectedItem = {0, 0};
-    map_dragOBJ(game, &selectedItem);
+    map_dragOBJ(game, &selectedItem, axise);
     if (ImGui::IsKeyDown(ImGuiKey_LeftShift))
     {
 
@@ -240,6 +293,7 @@ void map_IMGUIMENU(GAME *game)
 
     ImGui::Begin("MapEditor");
     ImGui::Text("Selected Object - %i, %i", selectedItem.type, selectedItem.id);
+    ImGui::Checkbox("Enable Grid Snap", &axise);
     ImGui::Combo("Select type", &selEDMOD, items, IM_ARRAYSIZE(items));
     if (ImGui::BeginTabBar("Map Editor"))
     {

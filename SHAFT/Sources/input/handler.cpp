@@ -22,6 +22,7 @@ void processKeys(GAME *game)
             {
             case SDL_WINDOWEVENT_RESIZED:
             {
+                
                 SDL_GetWindowSize(game->window, &game->winres.x, &game->winres.y);
                 glViewport(0, 0, game->winres.x, game->winres.y);
             }

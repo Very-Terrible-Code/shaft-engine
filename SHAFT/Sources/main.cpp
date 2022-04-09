@@ -49,7 +49,6 @@ int main()
 
         map_IMGUIMENU(&game);
         
-
         ImGuiEndRender();
         
 #endif

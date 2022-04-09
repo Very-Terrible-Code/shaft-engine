@@ -113,9 +113,11 @@ typedef struct GAME
     inHandle input;
     texdb texm;
     vec2i winres;
+    vec2i orgwinres;
     map cmap;
     openglSet gl;
     bool gameRunning;
+
 //#ifdef ENABLE_EDITOR
     Shader debugBLOCK;
 //#endif
