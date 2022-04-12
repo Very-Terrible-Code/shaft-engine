@@ -9,7 +9,4 @@ void loadMAP(char *name, GAME *game);
 
 void saveMAP(char *name, GAME *game);
 
-void map_IMGUIMENU(GAME *game);
-
-void map_eCOL_IMGUIMENU(GAME* game, dectile *dct);
-
+void removeIDB(GAME* game, int id);

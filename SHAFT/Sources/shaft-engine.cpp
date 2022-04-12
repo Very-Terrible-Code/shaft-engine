@@ -40,6 +40,8 @@ void initGame(GAME *instance, int width, int height)
     instance->winres.y = height;
     instance->orgwinres.x = width;
     instance->orgwinres.y = height;
+    instance->percs.x = 1;
+    instance->percs.y = 1;
     instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/texc.frag").c_str());
 //#ifdef ENABLE_EDITOR
     instance->debugBLOCK.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/rawcol.frag").c_str());

@@ -50,11 +50,8 @@ int main()
         map_IMGUIMENU(&game);
         
         ImGuiEndRender();
-        
-#endif
-
-        
     
+#endif
 
         SDL_GL_SwapWindow(game.window);
     }

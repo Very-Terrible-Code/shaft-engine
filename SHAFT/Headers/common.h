@@ -114,6 +114,7 @@ typedef struct GAME
     texdb texm;
     vec2i winres;
     vec2i orgwinres;
+    vec2 percs;
     map cmap;
     openglSet gl;
     bool gameRunning;

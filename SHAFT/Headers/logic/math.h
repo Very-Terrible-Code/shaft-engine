@@ -41,3 +41,4 @@ vec2 glmToVec2(glm::vec2 input);
 vec2 vec2itoVec2(vec2i input);
 glm::vec3 vec3toGLM(vec3 input);
 vec3 glmToVec3(glm::vec3 input);
+vec2i vec2toVec2i(vec2 input);

@@ -24,6 +24,15 @@ void processKeys(GAME *game)
             {
                 
                 SDL_GetWindowSize(game->window, &game->winres.x, &game->winres.y);
+                game->percs.x = (float)(((float)game->winres.x * 100) / (float)game->orgwinres.x)  / 100 ;
+                game->percs.y = (float)(((float)game->winres.y * 100) / (float)game->orgwinres.y)  / 100 ;
+                if(game->percs.x == 0){
+                    game->percs.x = 1;
+                }
+                if(game->percs.y == 0){
+                    game->percs.y = 1;
+                }
+                printf("------\nX: %f\nY: %f\n", game->percs.x, game->percs.y);
                 glViewport(0, 0, game->winres.x, game->winres.y);
             }
             }

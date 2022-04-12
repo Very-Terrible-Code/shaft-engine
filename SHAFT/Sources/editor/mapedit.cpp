@@ -1,5 +1,6 @@
 #include "editor/debug.h"
 #include "editor/mapedit.h"
+#include "game/map.h"
 #include "render/render.h"
 
 void map_eCOL_IMGUIMENU(GAME *game)
@@ -63,22 +64,44 @@ void map_eCOL_IMGUIMENU(GAME *game)
     }
 }
 
-void map_IMGUIDISPLAYDCT(GAME *game, int id)
+void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid)
 {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
-    ImGui::Button("^");
-    ImGui::Button("V");
+    ImGui::TreeNodeEx((char *)game->cmap.decorationsTile[id].tag, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth);
+
+    std::string b = "  Delete##" + std::to_string(drid);
+    if (ImGui::Button(b.c_str()))
+    {
+
+        removeIDB(game, drid);
+    }
+
     ImGui::TableNextColumn();
     ImVec2 uv_min = ImVec2(0.0f, 0.0f);
     ImVec2 uv_max = ImVec2(1.0f, 1.0f);
     ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     ImGui::Image((void *)(intptr_t)game->texm.textures[game->cmap.decorationsTile[id].tex].texture.glLoc, ImVec2(50, 50), uv_min, uv_max, tint_col, border_col);
+
+
     ImGui::TableNextColumn();
-    ImGui::Text("RAW ID: %i", id);
-    ImGui::TableNextColumn();
-    ImGui::Text("Name: %s", (char *)game->cmap.decorationsTile[id].tag);
+    std::string a = "^##" + std::to_string(drid);
+    std::string c = "V##" + std::to_string(drid);
+    if (ImGui::Button(a.c_str()))
+    {
+        if (drid != 0)
+        {
+            std::swap(game->cmap.drawOrder[drid], game->cmap.drawOrder[drid - 1]);
+        }
+    }
+    if (ImGui::Button(c.c_str()))
+    {
+        if (drid != (int)game->cmap.drawOrder.size() - 1)
+        {
+            std::swap(game->cmap.drawOrder[drid], game->cmap.drawOrder[drid + 1]);
+        }
+    }
     ImGui::TableNextColumn();
     ImGui::Text("Pos: %fx%f", game->cmap.decorationsTile[id].pos.x, game->cmap.decorationsTile[id].pos.y);
     ImGui::Text("Size: %fx%f", game->cmap.decorationsTile[id].scl.x, game->cmap.decorationsTile[id].scl.y);
@@ -114,9 +137,10 @@ void map_dragOBJ(GAME *game, drawOIT *item, bool axis)
                 raw_drawBP(game, glm::vec2(midpoint.x, midpoint.y - 20), glm::vec2(10., 10.), 0., glm::vec3(1., 0., 0.));
                 raw_drawBP(game, glm::vec2(midpoint.x - 20, midpoint.y), glm::vec2(10., 10.), 0., glm::vec3(0., 1., 0.));
 
-                //HELL TIME
+                // HELL TIME
                 vec2i mouse;
                 SDL_GetMouseState(&mouse.x, &mouse.y);
+
                 raw_drawBP(game, vec2itoGLM(mouse), glm::vec2(8., 8.), 0., glm::vec3(1., 1., 1.));
                 SDL_Rect phf = {mouse.x, mouse.y, 8, 8};
                 SDL_Rect sax = {(int)midpoint.x, (int)midpoint.y, 10, 10};
@@ -198,7 +222,7 @@ void map_dragOBJ(GAME *game, drawOIT *item, bool axis)
                             }
                             break;
                         case 2:
-                            sax = {(int)game->cmap.decorationsTile[item->id].pos.x + (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].pos.y , (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].scl.y};
+                            sax = {(int)game->cmap.decorationsTile[item->id].pos.x + (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].pos.y, (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].scl.y};
                             if (SDL_HasIntersection(&sax, &phf))
                             {
                                 game->cmap.decorationsTile[item->id].pos.x += game->cmap.decorationsTile[item->id].scl.x;
@@ -317,13 +341,12 @@ void map_IMGUIMENU(GAME *game)
         {
             if (game->cmap.drawOrder.size())
             {
-                if (ImGui::BeginTable("edit", 6, flags))
+                if (ImGui::BeginTable("edit", 5, flags))
                 {
                     const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
-                    ImGui::TableSetupColumn("Move", ImGuiTableColumnFlags_NoHide);
+                    ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
                     ImGui::TableSetupColumn("Preview", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 12.0f);
-                    ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 12.0f);
-                    ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 12.0f);
+                    ImGui::TableSetupColumn("Move", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 12.0f);
                     ImGui::TableSetupColumn("Stats", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 18.0f);
                     ImGui::TableSetupColumn("Info", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 18.0f);
                     ImGui::TableHeadersRow();
@@ -333,7 +356,7 @@ void map_IMGUIMENU(GAME *game)
                         {
                         case S_DECTILE:
                         {
-                            map_IMGUIDISPLAYDCT(game, game->cmap.drawOrder[i].id);
+                            map_IMGUIDISPLAYDCT(game, game->cmap.drawOrder[i].id, i);
                             break;
                         }
                         }
