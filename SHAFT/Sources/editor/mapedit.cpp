@@ -19,7 +19,7 @@ void map_eCOL_IMGUIMENU(GAME *game)
         ImGui::InputFloat2("Position", pos, "%.3f units");
         ImGui::InputFloat2("Scale", scl, "%.3f units");
         ImGui::InputFloat("Rotation", &dct.rot, 0.1, 0.15, "%.3f degrees");
-        ImGui::InputInt("Texture ID:", (int *)&tex);
+        ImGui::InputInt("Texture ID", (int *)&tex);
         if (tex > (int)game->texm.textures.size() - 1)
         {
             tex--;
@@ -64,17 +64,31 @@ void map_eCOL_IMGUIMENU(GAME *game)
     }
 }
 
-void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid)
+void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid, drawOIT *sel)
 {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
     ImGui::TreeNodeEx((char *)game->cmap.decorationsTile[id].tag, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth);
 
-    std::string b = "  Delete##" + std::to_string(drid);
+    std::string b = "Delete##" + std::to_string(drid);
+    std::string g = "Select##" + std::to_string(drid);
     if (ImGui::Button(b.c_str()))
     {
-
         removeIDB(game, drid);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(g.c_str()))
+    {
+        sel->id = id;
+        sel->type = S_DECTILE;
+    }
+
+    if(sel->id == id){
+        switch(sel->type){
+            case S_DECTILE:
+            ImGui::TextColored(ImVec4{0., 1., 0., 1.}, "Selected!");
+            break;
+        }
     }
 
     ImGui::TableNextColumn();
@@ -106,6 +120,18 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid)
     ImGui::Text("Pos: %fx%f", game->cmap.decorationsTile[id].pos.x, game->cmap.decorationsTile[id].pos.y);
     ImGui::Text("Size: %fx%f", game->cmap.decorationsTile[id].scl.x, game->cmap.decorationsTile[id].scl.y);
     ImGui::Text("Rotation: %f", game->cmap.decorationsTile[id].rot);
+    std::string again = "Edit##" + std::to_string(drid);
+    if (ImGui::CollapsingHeader(again.c_str()))
+    {
+        static float* pos[2] = {&game->cmap.decorationsTile[id].pos.x, &game->cmap.decorationsTile[id].pos.y};
+        static float* scl[2] = {&game->cmap.decorationsTile[id].scl.x, &game->cmap.decorationsTile[id].scl.y};
+
+        ImGui::InputText("Name", (char *)game->cmap.decorationsTile[id].tag, 32);
+        ImGui::InputFloat2("Position", *pos, "%.3f units");
+        ImGui::InputFloat2("Scale", *scl, "%.3f units");
+        ImGui::InputFloat("Rotation", &game->cmap.decorationsTile[id].rot, 0.1, 0.15, "%.3f degrees");
+        ImGui::InputInt("Texture ID", &game->cmap.decorationsTile[id].tex);
+    }
     ImGui::TableNextColumn();
     if (game->cmap.decorationsTile[id].scr.impl == NULL)
     {
@@ -356,7 +382,7 @@ void map_IMGUIMENU(GAME *game)
                         {
                         case S_DECTILE:
                         {
-                            map_IMGUIDISPLAYDCT(game, game->cmap.drawOrder[i].id, i);
+                            map_IMGUIDISPLAYDCT(game, game->cmap.drawOrder[i].id, i, &selectedItem);
                             break;
                         }
                         }
