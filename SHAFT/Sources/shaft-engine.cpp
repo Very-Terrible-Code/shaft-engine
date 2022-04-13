@@ -43,14 +43,20 @@ void initGame(GAME *instance, int width, int height)
     instance->percs.x = 1;
     instance->percs.y = 1;
     instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/texc.frag").c_str());
+    instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/fb.frag").c_str());
+
 //#ifdef ENABLE_EDITOR
     instance->debugBLOCK.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/rawcol.frag").c_str());
 //#endif
     initRenderer(instance);
+
     instance->gameRunning = true;
     glViewport(0, 0, instance->winres.x, instance->winres.y);
     return;
 }
+
+
+
 
 void initImGui(GAME *game)
 {

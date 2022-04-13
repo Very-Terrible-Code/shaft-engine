@@ -6,7 +6,7 @@ void sh_debugMenu(GAME *game)
     ImGui::Begin("Debug Menu");
     if (ImGui::CollapsingHeader("Debug Texture Viewer"))
     {
-
+        ImGui::Text("Framebuffer tex: %i", game->gl.tecg);
         ImGui::InputInt("Texture Input", (int *)&debugtex);
         ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
         ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right

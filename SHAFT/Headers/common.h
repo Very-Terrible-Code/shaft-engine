@@ -76,6 +76,11 @@ typedef struct openglSet
     GLuint quadVAO;
     Shader shader;
 
+    unsigned int MSFBO, FBO; // MSFBO = Multisampled FBO. FBO is regular, used for blitting MS color-buffer to texture
+    unsigned int RBO; // RBO is used for multisampled color buffer
+    unsigned int VAO;
+    unsigned int tecg;
+    Shader screenShader;
 } openglSet;
 
 typedef struct tex

@@ -37,9 +37,11 @@ int main()
 
         clearScreen();
 
-        renderScene(&game);
         
-#ifdef ENABLE_EDITOR
+        
+
+        renderScene(&game);
+        #ifdef ENABLE_EDITOR
 
         ImGuiBeginRender(&game);
 
@@ -52,7 +54,6 @@ int main()
         ImGuiEndRender();
     
 #endif
-
         SDL_GL_SwapWindow(game.window);
     }
 

@@ -6,6 +6,9 @@
 
 void initRenderer(GAME *game);
 
+void configFrameBuffer(GAME* game);
+
+
 void raw_drawSP(GAME *game, GLuint *texture, glm::vec2 position,  glm::vec2 size, float rotate, glm::vec3 color);
 
 //#ifdef ENABLE_EDITOR
@@ -15,3 +18,6 @@ void raw_drawBP(GAME *game, glm::vec2 position, glm::vec2 size, float rotate, gl
 void clearScreen();
 
 void renderScene(GAME* render);
+void fRender(GAME* game);
+void beginRenderFrameBuffer(GAME* game);
+void endRenderFrameBuffer(GAME* game);

@@ -4,6 +4,34 @@
 
 void initRenderer(GAME *game)
 {
+
+    
+    glGenFramebuffers(1, &game->gl.MSFBO);
+    glGenFramebuffers(1, &game->gl.FBO);
+    glGenRenderbuffers(1, &game->gl.RBO);
+    // initialize renderbuffer storage with a multisampled color buffer (don't need a depth/stencil buffer)
+    glBindFramebuffer(GL_FRAMEBUFFER, game->gl.MSFBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, game->gl.RBO);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGB, game->winres.x, game->winres.y); // allocate storage for render buffer object
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, game->gl.RBO); // attach MS render buffer object to framebuffer
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::POSTPROCESSOR: Failed to initialize MSFBO" << std::endl;
+    // also initialize the FBO/texture to blit multisampled color-buffer to; used for shader operations (for postprocessing effects)
+    glBindFramebuffer(GL_FRAMEBUFFER, game->gl.FBO);
+    glGenTextures(1, &game->gl.tecg);
+    glBindTexture(GL_TEXTURE_2D, game->gl.tecg);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, game->winres.x, game->winres.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, game->gl.tecg, 0); // attach texture to framebuffer as its color attachment
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::POSTPROCESSOR: Failed to initialize FBO" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    configFrameBuffer(game);
+}
+
+void configFrameBuffer(GAME* game)
+{
     unsigned int VBO;
     float vertices[] = {
         0.0f, 1.0f, 0.0f, 1.0f,
@@ -27,6 +55,33 @@ void initRenderer(GAME *game)
     glBindVertexArray(0);
 }
 
+void beginRenderFrameBuffer(GAME* game)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, game->gl.MSFBO);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void endRenderFrameBuffer(GAME* game)
+{
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, game->gl.MSFBO);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, game->gl.FBO);
+    glBlitFramebuffer(0, 0, game->winres.x, game->winres.y, 0, 0, game->winres.x, game->winres.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // binds both READ and WRITE framebuffer to default framebuffer
+}
+
+void fRender(GAME* game){
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    game->gl.screenShader.Use();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, game->gl.tecg);	
+    glBindVertexArray(game->gl.VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+}
+
 void clearScreen()
 {
 
@@ -35,8 +90,10 @@ void clearScreen()
 }
 void renderScene(GAME *game)
 {
+    game->gl.shader.Use();
     game->gl.shader.SetMatrix4("projection", game->gl.projection);
-
+    
+    beginRenderFrameBuffer(game);
     for (int i = 0; i < (int)game->cmap.drawOrder.size(); i++)
     {
         switch (game->cmap.drawOrder[i].type)
@@ -59,11 +116,13 @@ void renderScene(GAME *game)
         }
         }
     }
-
+    endRenderFrameBuffer(game);
+    fRender(game);
     
 }
 void raw_drawSP(GAME *game, GLuint *texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
 {
+
     game->gl.shader.Use();
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position, 0.0f));
