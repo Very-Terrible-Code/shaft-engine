@@ -13,7 +13,8 @@
 #include "editor/mapedit.h"
 #include "editor/texedit.h"
 #endif
-
+void  debugCallback(GLenum source, GLenum type, GLuint , GLenum severity,
+                    GLsizei , const GLchar *message, const void *);
 
 void initGame(GAME *instance, int width, int height);
 

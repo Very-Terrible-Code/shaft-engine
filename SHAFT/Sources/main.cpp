@@ -1,4 +1,5 @@
 #define ENABLE_EDITOR
+#define DEBUG
 #include "shaft-engine.h"
 #include "editor/debug.h"
 #include <glad/glad.h>
@@ -34,10 +35,6 @@ int main()
     {
 
         processKeys(&game);
-
-        clearScreen();
-
-        
         
 
         renderScene(&game);

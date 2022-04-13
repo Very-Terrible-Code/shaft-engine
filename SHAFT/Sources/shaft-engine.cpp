@@ -20,6 +20,63 @@ std::string readFileIntoString(const std::string &path)
     return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 }
 
+void debugCallback(GLenum source, GLenum type, GLuint, GLenum severity,
+                   GLsizei, const GLchar *message, const void *)
+{
+    std::string srcStr = "UNDEFINED";
+    severity = severity;
+    switch (source)
+
+    {
+    case GL_DEBUG_SOURCE_API:
+        srcStr = "API";
+        break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+        srcStr = "WINDOW_SYSTEM";
+        break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
+        srcStr = "SHADER_COMPILER";
+        break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY:
+        srcStr = "THIRD_PARTY";
+        break;
+    case GL_DEBUG_SOURCE_APPLICATION:
+        srcStr = "APPLICATION";
+        break;
+    case GL_DEBUG_SOURCE_OTHER:
+        srcStr = "OTHER";
+        break;
+    }
+
+    std::string typeStr = "UNDEFINED";
+
+    switch (type)
+    {
+
+    case GL_DEBUG_TYPE_ERROR:
+        //	__debugbreak();
+        typeStr = "ERROR";
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        typeStr = "DEPRECATED_BEHAVIOR";
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        typeStr = "UNDEFINED_BEHAVIOR";
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+        typeStr = "PORTABILITY";
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        typeStr = "PERFORMANCE";
+        break;
+    case GL_DEBUG_TYPE_OTHER:
+        typeStr = "OTHER";
+        break;
+    }
+
+    std::cout << "OpenGL " << typeStr << " [" << srcStr << "]: " << message << std::endl;
+}
+
 void initGame(GAME *instance, int width, int height)
 {
     printf("SHAFT Engine 1.00\nhttps://github.com/PipeWarp/SHAFTEng\n");
@@ -36,6 +93,16 @@ void initGame(GAME *instance, int width, int height)
     instance->context = SDL_GL_CreateContext(instance->window);
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
     SDL_GL_SetSwapInterval(1);
+#ifdef DEBUG
+    glEnable(GL_DEBUG_OUTPUT);
+
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, NULL,
+                          GL_TRUE);
+    glDebugMessageCallback(debugCallback, nullptr);
+#endif
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+    glEnable(GL_MULTISAMPLE);
     instance->winres.x = width;
     instance->winres.y = height;
     instance->orgwinres.x = width;
@@ -45,18 +112,15 @@ void initGame(GAME *instance, int width, int height)
     instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/texc.frag").c_str());
     instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/fb.frag").c_str());
 
-//#ifdef ENABLE_EDITOR
+    //#ifdef ENABLE_EDITOR
     instance->debugBLOCK.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/rawcol.frag").c_str());
-//#endif
+    //#endif
     initRenderer(instance);
 
     instance->gameRunning = true;
     glViewport(0, 0, instance->winres.x, instance->winres.y);
     return;
 }
-
-
-
 
 void initImGui(GAME *game)
 {
