@@ -5,32 +5,25 @@
 void initRenderer(GAME *game)
 {
 
-    
     glGenFramebuffers(1, &game->gl.MSFBO);
     glGenFramebuffers(1, &game->gl.FBO);
     glGenRenderbuffers(1, &game->gl.RBO);
-    
     glBindFramebuffer(GL_FRAMEBUFFER, game->gl.MSFBO);
     glBindRenderbuffer(GL_RENDERBUFFER, game->gl.RBO);
     glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGB, game->winres.x, game->winres.y);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, game->gl.RBO); 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "Failed to initialize MSFBO" << std::endl;
-    
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, game->gl.RBO);
     glBindFramebuffer(GL_FRAMEBUFFER, game->gl.FBO);
     glGenTextures(1, &game->gl.tecg);
     glBindTexture(GL_TEXTURE_2D, game->gl.tecg);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, game->winres.x, game->winres.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, game->gl.tecg, 0); 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "Failed to initialize FBO" << std::endl;
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, game->gl.tecg, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     configFrameBuffer(game);
 }
 
-void configFrameBuffer(GAME* game)
+void configFrameBuffer(GAME *game)
 {
     unsigned int VBO;
     float vertices[] = {
@@ -55,32 +48,27 @@ void configFrameBuffer(GAME* game)
     glBindVertexArray(0);
 }
 
-void beginRenderFrameBuffer(GAME* game)
+void beginRenderFrameBuffer(GAME *game)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, game->gl.MSFBO);
-    glClearColor(0.192f,0.2f,0.208f, 1.0f);
+    glClearColor(0.192f, 0.2f, 0.208f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void endRenderFrameBuffer(GAME* game)
+void endRenderFrameBuffer(GAME *game)
 {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, game->gl.MSFBO);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, game->gl.FBO);
     glBlitFramebuffer(0, 0, game->winres.x, game->winres.y, 0, 0, game->winres.x, game->winres.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // binds both READ and WRITE framebuffer to default framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); 
 }
 
-void fRender(GAME* game){
+void fRender(GAME *game)
+{
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-
     game->gl.screenShader.Use();
-    //game->gl.screenShader.SetVector2f("TexCoords", vec2itoGLM(game->winres));
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, game->gl.tecg);	
-    glBindVertexArray(game->gl.VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
+    raw_drawTX(game, &game->gl.tecg, vec2itoGLM(game->winres));
 }
 
 void clearScreen()
@@ -93,7 +81,7 @@ void renderScene(GAME *game)
 {
     game->gl.shader.Use();
     game->gl.shader.SetMatrix4("projection", game->gl.projection);
-    
+
     beginRenderFrameBuffer(game);
     for (int i = 0; i < (int)game->cmap.drawOrder.size(); i++)
     {
@@ -119,7 +107,6 @@ void renderScene(GAME *game)
     }
     endRenderFrameBuffer(game);
     fRender(game);
-    
 }
 void raw_drawSP(GAME *game, GLuint *texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
 {
@@ -144,10 +131,30 @@ void raw_drawSP(GAME *game, GLuint *texture, glm::vec2 position, glm::vec2 size,
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 }
+void raw_drawTX(GAME *game, GLuint *texture, glm::vec2 size)
+{
+    game->gl.screenShader.SetMatrix4("projection", game->gl.projection);
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.f, 0.f, 0.0f));
+
+    model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f));
+    model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f));
+
+    model = glm::scale(model, glm::vec3(size, 1.0f));
+
+    game->gl.screenShader.SetMatrix4("model", model);
+    game->gl.screenShader.SetVector2f("res", vec2itoGLM(game->winres));
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, *texture);
+
+    glBindVertexArray(game->gl.quadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+}
 //#ifdef ENABLE_EDITOR
 void raw_drawBP(GAME *game, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
 {
-    
+
     game->debugBLOCK.Use();
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position, 0.0f));
@@ -160,7 +167,6 @@ void raw_drawBP(GAME *game, glm::vec2 position, glm::vec2 size, float rotate, gl
     game->debugBLOCK.SetMatrix4("projection", game->gl.projection);
     game->debugBLOCK.SetMatrix4("model", model);
     game->debugBLOCK.SetVector3f("icolor", color);
-
 
     glBindVertexArray(game->gl.quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);

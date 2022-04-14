@@ -21,3 +21,4 @@ void renderScene(GAME* render);
 void fRender(GAME* game);
 void beginRenderFrameBuffer(GAME* game);
 void endRenderFrameBuffer(GAME* game);
+void raw_drawTX(GAME *game, GLuint *texture, glm::vec2 size);
