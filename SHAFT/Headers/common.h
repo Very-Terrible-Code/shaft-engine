@@ -44,6 +44,14 @@ typedef struct map
     script globalscr;
 } map;
 
+typedef struct mapHeader{
+    int s_dectile;
+    int s_coltile;
+    int s_col;
+    int s_do;
+    char texloc[64];
+}mapHeader;
+
 typedef struct keyStat
 {
     bool keydown;

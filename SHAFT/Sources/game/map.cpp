@@ -8,8 +8,33 @@ void loadMAP(char *name, GAME *game)
 
 void saveMAP(char *name, GAME *game)
 {
-    name = name;
-    game = game;
+    std::ofstream savedata;
+    savedata.open(name, std::ofstream::binary);
+    if (savedata)
+    {
+        mapHeader fh;
+        fh.s_dectile = (int)game->cmap.decorationsTile.size();
+        fh.s_coltile = (int)game->cmap.collisionTile.size();
+        fh.s_col = (int)game->cmap.collision.size();
+        fh.s_do = (int)game->cmap.drawOrder.size();
+        memcpy(&fh.texloc, &game->texm.sourcefile, 64);
+
+        savedata.write(reinterpret_cast<char *>(&fh),
+                       sizeof(mapHeader));
+        savedata.write(reinterpret_cast<char *>(&game->cmap.decorationsTile[0]),
+                       sizeof(dectile) * fh.s_dectile);
+        savedata.write(reinterpret_cast<char *>(&game->cmap.collisionTile[0]),
+                       sizeof(coltile) * fh.s_coltile);
+        savedata.write(reinterpret_cast<char *>(&game->cmap.collision[0]),
+                       sizeof(col) * fh.s_col);
+        savedata.write(reinterpret_cast<char *>(&game->cmap.drawOrder[0]),
+                       sizeof(drawOIT) * fh.s_do);
+        savedata.close();
+    }
+    else
+    {
+        savedata.close();
+    }
 }
 
 void removeIDB(GAME *game, int id)

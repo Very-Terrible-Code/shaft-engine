@@ -9,6 +9,7 @@ void loadTextureDB(char *name, GAME *game)
         game->texm.loadTexCheck = true;
         clearTEX(game);
         game->texm.textures.clear();
+        memcpy(&game->texm.sourcefile, name, 64);
 
         texdbheader fh;
 

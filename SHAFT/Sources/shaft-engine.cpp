@@ -110,6 +110,7 @@ void initGame(GAME *instance, int width, int height)
     instance->percs.x = 1;
     instance->percs.y = 1;
     instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/texc.frag").c_str());
+    
     instance->gl.screenShader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/fb.frag").c_str());
 
     //#ifdef ENABLE_EDITOR

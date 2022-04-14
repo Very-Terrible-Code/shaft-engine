@@ -4,6 +4,7 @@ void sh_debugMenu(GAME *game)
 {
     static unsigned int debugtex = 0;
     ImGui::Begin("Debug Menu");
+
     if (ImGui::CollapsingHeader("Debug Texture Viewer"))
     {
         ImGui::Text("Framebuffer tex: %i", game->gl.tecg);

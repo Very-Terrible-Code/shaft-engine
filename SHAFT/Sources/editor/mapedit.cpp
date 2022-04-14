@@ -83,9 +83,11 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid, drawOIT *sel)
         sel->type = S_DECTILE;
     }
 
-    if(sel->id == id){
-        switch(sel->type){
-            case S_DECTILE:
+    if (sel->id == id)
+    {
+        switch (sel->type)
+        {
+        case S_DECTILE:
             ImGui::TextColored(ImVec4{0., 1., 0., 1.}, "Selected!");
             break;
         }
@@ -97,7 +99,6 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid, drawOIT *sel)
     ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     ImGui::Image((void *)(intptr_t)game->texm.textures[game->cmap.decorationsTile[id].tex].texture.glLoc, ImVec2(50, 50), uv_min, uv_max, tint_col, border_col);
-
 
     ImGui::TableNextColumn();
     std::string a = "^##" + std::to_string(drid);
@@ -123,8 +124,8 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid, drawOIT *sel)
     std::string again = "Edit##" + std::to_string(drid);
     if (ImGui::CollapsingHeader(again.c_str()))
     {
-        static float* pos[2] = {&game->cmap.decorationsTile[id].pos.x, &game->cmap.decorationsTile[id].pos.y};
-        static float* scl[2] = {&game->cmap.decorationsTile[id].scl.x, &game->cmap.decorationsTile[id].scl.y};
+        static float *pos[2] = {&game->cmap.decorationsTile[id].pos.x, &game->cmap.decorationsTile[id].pos.y};
+        static float *scl[2] = {&game->cmap.decorationsTile[id].scl.x, &game->cmap.decorationsTile[id].scl.y};
 
         ImGui::InputText("Name", (char *)game->cmap.decorationsTile[id].tag, 32);
         ImGui::InputFloat2("Position", *pos, "%.3f units");
@@ -342,6 +343,7 @@ void map_IMGUIMENU(GAME *game)
     }
 
     ImGui::Begin("MapEditor");
+    ImGui::Text("Currently loaded TextureDB: %s", (char *)game->texm.sourcefile);
     ImGui::Text("Selected Object - %i, %i", selectedItem.type, selectedItem.id);
     ImGui::Checkbox("Enable Grid Snap", &axise);
     ImGui::Combo("Select type", &selEDMOD, items, IM_ARRAYSIZE(items));
@@ -395,6 +397,19 @@ void map_IMGUIMENU(GAME *game)
         ImGui::EndTabBar();
     }
     ImGui::Separator();
+    static char tempolocsave[64] = "";
+    ImGui::InputTextWithHint(" ", "rsc/level1.map", tempolocsave, IM_ARRAYSIZE(tempolocsave));
+    ImGui::SameLine();
+    if (ImGui::Button("Save DB"))
+    {
+        saveMAP(tempolocsave, game);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Load DB"))
+    {
+        loadMAP(tempolocsave, game);
+    }
+
     ImGui::End();
 }
 
