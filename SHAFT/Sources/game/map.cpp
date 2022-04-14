@@ -1,9 +1,48 @@
 #include "game/map.h"
+#include "textures/manager.h"
+#include <cstring>
 
 void loadMAP(char *name, GAME *game)
 {
-    name = name;
-    game = game;
+    std::ifstream is(name, std::ifstream::binary);
+    if (is)
+    {
+        game->cmap.decorationsTile.clear();
+        game->cmap.collisionTile.clear();
+        game->cmap.collision.clear();
+        game->cmap.drawOrder.clear();
+
+        //memcpy(&game->texm.sourcefile, name, 64);
+
+        mapHeader fh;
+
+        is.read(reinterpret_cast<char *>(&fh), sizeof(mapHeader));
+
+        game->cmap.decorationsTile.resize(fh.s_dectile);
+        game->cmap.collisionTile.resize(fh.s_coltile);
+        game->cmap.collision.resize(fh.s_col);
+        game->cmap.drawOrder.resize(fh.s_do);
+
+        is.read(reinterpret_cast<char *>(game->cmap.decorationsTile.data()), fh.s_dectile * sizeof(dectile));
+        is.read(reinterpret_cast<char *>(game->cmap.collisionTile.data()), fh.s_coltile * sizeof(coltile));
+        is.read(reinterpret_cast<char *>(game->cmap.collision.data()), fh.s_col * sizeof(col));
+        is.read(reinterpret_cast<char *>(game->cmap.drawOrder.data()), fh.s_do * sizeof(drawOIT));
+
+        is.close();
+        // load textures
+        switch(strcmp((char*)game->texm.sourcefile, fh.texloc)){
+            case 0:
+            break;
+            default:
+            loadTextureDB(fh.texloc, game);
+            break;
+        }
+
+    }
+    else
+    {
+        is.close();
+    }
 }
 
 void saveMAP(char *name, GAME *game)
