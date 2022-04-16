@@ -9,7 +9,8 @@ using namespace luabridge;
 
 typedef struct script{
     lua_State* impl;
-    char* scriptloc;
+    bool exist;
+    char * script[100000]; // Limits = Creativity
     bool running;
 }script;
 
@@ -18,5 +19,5 @@ void loadAndRunScript(script* pscript, const char* location);
 void initScript(script *pscript);
 
 void runScript(script* pscript, const char* location);
-
+void runScriptEmb(script *pscript);
 LuaRef getGlobalScr(script * pscript, const char* var);

@@ -10,3 +10,5 @@ void sh_debugMenu(GAME *game);
 void ImGuiBeginRender(GAME* render);
 
 void ImGuiEndRender();
+
+const char* DB_imIDGEN(char* name, int id);

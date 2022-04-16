@@ -37,7 +37,13 @@ void loadMAP(char *name, GAME *game)
             loadTextureDB(fh.texloc, game);
             break;
         }
-
+        for(int i = 0; i < (int)game->cmap.decorationsTile.size(); i++){
+            switch(game->cmap.decorationsTile[i].scr.exist){
+                case 1:
+                initScript(&game->cmap.decorationsTile[i].scr);
+                break;
+            }
+        }
     }
     else
     {

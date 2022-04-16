@@ -49,7 +49,7 @@ void map_eCOL_IMGUIMENU(GAME *game)
             base.rot = dct.rot;
             base.attc = -1;
             base.scr.impl = NULL;
-
+            base.scr.exist = 0;
             base.tex = (unsigned int)tex;
             memcpy(&base.tag, tag, strlen(tag) + 1);
             game->cmap.decorationsTile.push_back(base);
@@ -70,14 +70,12 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid, drawOIT *sel)
     ImGui::TableNextColumn();
     ImGui::TreeNodeEx((char *)game->cmap.decorationsTile[id].tag, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth);
 
-    std::string b = "Delete##" + std::to_string(drid);
-    std::string g = "Select##" + std::to_string(drid);
-    if (ImGui::Button(b.c_str()))
+    if (ImGui::Button(DB_imIDGEN((char *)"Delete", drid)))
     {
         removeIDB(game, drid);
     }
     ImGui::SameLine();
-    if (ImGui::Button(g.c_str()))
+    if (ImGui::Button(DB_imIDGEN((char *)"Select", drid)))
     {
         sel->id = id;
         sel->type = S_DECTILE;
@@ -101,16 +99,15 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid, drawOIT *sel)
     ImGui::Image((void *)(intptr_t)game->texm.textures[game->cmap.decorationsTile[id].tex].texture.glLoc, ImVec2(50, 50), uv_min, uv_max, tint_col, border_col);
 
     ImGui::TableNextColumn();
-    std::string a = "^##" + std::to_string(drid);
-    std::string c = "V##" + std::to_string(drid);
-    if (ImGui::Button(a.c_str()))
+
+    if (ImGui::Button(DB_imIDGEN((char *)"^", drid)))
     {
         if (drid != 0)
         {
             std::swap(game->cmap.drawOrder[drid], game->cmap.drawOrder[drid - 1]);
         }
     }
-    if (ImGui::Button(c.c_str()))
+    if (ImGui::Button(DB_imIDGEN((char *)"V", drid)))
     {
         if (drid != (int)game->cmap.drawOrder.size() - 1)
         {
@@ -121,9 +118,11 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid, drawOIT *sel)
     ImGui::Text("Pos: %fx%f", game->cmap.decorationsTile[id].pos.x, game->cmap.decorationsTile[id].pos.y);
     ImGui::Text("Size: %fx%f", game->cmap.decorationsTile[id].scl.x, game->cmap.decorationsTile[id].scl.y);
     ImGui::Text("Rotation: %f", game->cmap.decorationsTile[id].rot);
-    std::string again = "Edit##" + std::to_string(drid);
-    if (ImGui::CollapsingHeader(again.c_str()))
+    // printf("TEST: %s", DB_imIDGEN((char*)"Edit", drid));fflush(NULL);
+    std::string nameds = DB_imIDGEN((char *)"Edit", drid);
+    if (ImGui::CollapsingHeader(nameds.c_str()))
     {
+
         static float *pos[2] = {&game->cmap.decorationsTile[id].pos.x, &game->cmap.decorationsTile[id].pos.y};
         static float *scl[2] = {&game->cmap.decorationsTile[id].scl.x, &game->cmap.decorationsTile[id].scl.y};
 
@@ -134,13 +133,31 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid, drawOIT *sel)
         ImGui::InputInt("Texture ID", &game->cmap.decorationsTile[id].tex);
     }
     ImGui::TableNextColumn();
-    if (game->cmap.decorationsTile[id].scr.impl == NULL)
+    if (game->cmap.decorationsTile[id].scr.exist == 0)
     {
         ImGui::Text("No script added.");
+        std::string g = DB_imIDGEN((char *)"Add Script", drid);
+        if (ImGui::Button(g.c_str()))
+        {
+            initScript(&game->cmap.decorationsTile[id].scr);
+            game->cmap.decorationsTile[id].scr.exist = 1;
+        }
     }
     else
     {
-        ImGui::Text("Script avalible");
+        std::string g = DB_imIDGEN((char *)"Run Script", drid);
+        std::string a = DB_imIDGEN((char *)"Remove", drid);
+        if (ImGui::Button(g.c_str()))
+        {
+            runScriptEmb(&game->cmap.decorationsTile[id].scr);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(a.c_str()))
+        {
+            game->cmap.decorationsTile[id].scr.impl = NULL;
+            game->cmap.decorationsTile[id].scr.exist = 0;
+        }
+        ImGui::InputTextMultiline("Edit", (char*)game->cmap.decorationsTile[id].scr.script, IM_ARRAYSIZE(game->cmap.decorationsTile[id].scr.script));
     }
 }
 

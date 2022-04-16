@@ -1,4 +1,5 @@
 #include "editor/debug.h"
+#include <string>
 
 void sh_debugMenu(GAME *game)
 {
@@ -52,4 +53,10 @@ void ImGuiEndRender()
 {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+const char* DB_imIDGEN(char* name, int id){
+    std::string namet = name;
+    namet += "##" + std::to_string(id);
+    return namet.c_str();
 }
