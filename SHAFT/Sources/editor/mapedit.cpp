@@ -3,11 +3,135 @@
 #include "game/map.h"
 #include "render/render.h"
 
-void map_eCOL_IMGUIMENU(GAME *game)
+void map_dragOBJ(GAME *game, int item, bool axis)
+{
+    axis = axis;
+    static bool held = false;
+    static int brad = 0;
+    if (!ImGui::IsKeyDown(ImGuiKey_LeftShift))
+    {
+        if (game->cmap.tiles.size())
+        {
+
+            vec2 midpoint = game->cmap.tiles[item].pos;
+            midpoint.x = midpoint.x + (game->cmap.tiles[item].scl.x / 2.);
+            midpoint.y = midpoint.y + (game->cmap.tiles[item].scl.y / 2.);
+            raw_drawBP(game, vec2toGLM(midpoint), glm::vec2(10., 10.), 0., glm::vec3(1., 1., 1.));
+            raw_drawBP(game, glm::vec2(midpoint.x, midpoint.y - 20), glm::vec2(10., 10.), 0., glm::vec3(1., 0., 0.));
+            raw_drawBP(game, glm::vec2(midpoint.x - 20, midpoint.y), glm::vec2(10., 10.), 0., glm::vec3(0., 1., 0.));
+
+            // HELL TIME
+            vec2i mouse;
+            SDL_GetMouseState(&mouse.x, &mouse.y);
+
+            raw_drawBP(game, vec2itoGLM(mouse), glm::vec2(8., 8.), 0., glm::vec3(1., 1., 1.));
+            SDL_Rect phf = {mouse.x, mouse.y, 8, 8};
+            SDL_Rect sax = {(int)midpoint.x, (int)midpoint.y, 10, 10};
+            if (!held)
+            {
+                if (SDL_HasIntersection(&sax, &phf))
+                {
+
+                    if (ImGui::IsMouseDown(0))
+                    {
+                        brad = 0;
+                        held = true;
+                    }
+                }
+
+                sax = {(int)midpoint.x, (int)midpoint.y - 20, 10, 10};
+                if (SDL_HasIntersection(&sax, &phf))
+                {
+
+                    if (ImGui::IsMouseDown(0))
+                    {
+                        brad = 1;
+                        held = true;
+                    }
+                }
+
+                sax = {(int)midpoint.x - 20, (int)midpoint.y, 10, 10};
+                if (SDL_HasIntersection(&sax, &phf))
+                {
+
+                    if (ImGui::IsMouseDown(0))
+                    {
+                        brad = 2;
+                        held = true;
+                    }
+                }
+            }
+            else
+            {
+                vec2 br = vec2itoVec2(mouse);
+                if (!axis)
+                {
+                    switch (brad)
+                    {
+                    case 0:
+
+                        br.x -= (game->cmap.tiles[item].scl.x / 2.);
+                        br.y -= (game->cmap.tiles[item].scl.y / 2.);
+                        game->cmap.tiles[item].pos = br;
+                        break;
+                    case 1:
+                        br.y -= (game->cmap.tiles[item].scl.y / 2.);
+                        br.y += 20;
+                        br.x = game->cmap.tiles[item].pos.x;
+                        game->cmap.tiles[item].pos = br;
+                        break;
+                    case 2:
+                        br.x -= (game->cmap.tiles[item].scl.x / 2.);
+                        br.x += 20;
+                        br.y = game->cmap.tiles[item].pos.y;
+                        game->cmap.tiles[item].pos = br;
+                        break;
+                    }
+                }
+                else
+                {
+                    switch (brad)
+                    {
+                    case 1:
+                        sax = {(int)game->cmap.tiles[item].pos.x, (int)game->cmap.tiles[item].pos.y + (int)game->cmap.tiles[item].scl.y, (int)game->cmap.tiles[item].scl.x, (int)game->cmap.tiles[item].scl.y};
+                        if (SDL_HasIntersection(&sax, &phf))
+                        {
+                            game->cmap.tiles[item].pos.y += game->cmap.tiles[item].scl.y;
+                        }
+                        sax = {(int)game->cmap.tiles[item].pos.x, (int)game->cmap.tiles[item].pos.y - (int)game->cmap.tiles[item].scl.y, (int)game->cmap.tiles[item].scl.x, (int)game->cmap.tiles[item].scl.y};
+                        if (SDL_HasIntersection(&sax, &phf))
+                        {
+                            game->cmap.tiles[item].pos.y -= game->cmap.tiles[item].scl.y;
+                        }
+                        break;
+                    case 2:
+                        sax = {(int)game->cmap.tiles[item].pos.x + (int)game->cmap.tiles[item].scl.x, (int)game->cmap.tiles[item].pos.y, (int)game->cmap.tiles[item].scl.x, (int)game->cmap.tiles[item].scl.y};
+                        if (SDL_HasIntersection(&sax, &phf))
+                        {
+                            game->cmap.tiles[item].pos.x += game->cmap.tiles[item].scl.x;
+                        }
+                        sax = {(int)game->cmap.tiles[item].pos.x - (int)game->cmap.tiles[item].scl.x, (int)game->cmap.tiles[item].pos.y, (int)game->cmap.tiles[item].scl.x, (int)game->cmap.tiles[item].scl.y};
+                        if (SDL_HasIntersection(&sax, &phf))
+                        {
+                            game->cmap.tiles[item].pos.x -= game->cmap.tiles[item].scl.x;
+                        }
+                        break;
+                    }
+                }
+                if (ImGui::IsMouseReleased(0))
+                {
+                    held = false;
+                }
+            }
+        }
+    }
+}
+
+void map_IMGUIMENUBY(GAME *game)
 {
     if (game->texm.textures.size())
     {
-        static dectile dct;
+        static tile dct;
         dct.scl.x = 100;
 
         dct.scl.y = 100;
@@ -40,22 +164,19 @@ void map_eCOL_IMGUIMENU(GAME *game)
 
         if (ImGui::Button("Add"))
         {
-            dectile base;
-            drawOIT drawo;
+            tile base;
             base.pos.x = pos[0];
             base.pos.y = pos[1];
             base.scl.x = scl[0];
             base.scl.y = scl[1];
             base.rot = dct.rot;
             base.attc = -1;
+            base.physOn = false;
             base.scr.impl = NULL;
             base.scr.exist = 0;
             base.tex = (unsigned int)tex;
             memcpy(&base.tag, tag, strlen(tag) + 1);
-            game->cmap.decorationsTile.push_back(base);
-            drawo.id = (int)game->cmap.decorationsTile.size() - 1;
-            drawo.type = S_DECTILE;
-            game->cmap.drawOrder.push_back(drawo);
+            game->cmap.tiles.push_back(base);
         }
     }
     else
@@ -64,31 +185,26 @@ void map_eCOL_IMGUIMENU(GAME *game)
     }
 }
 
-void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid, drawOIT *sel)
+void map_IMGUIDISPLAYDCT(GAME *game, int id, int *sel)
 {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
-    ImGui::TreeNodeEx((char *)game->cmap.decorationsTile[id].tag, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth);
+    ImGui::TreeNodeEx((char *)game->cmap.tiles[id].tag, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth);
 
-    if (ImGui::Button(DB_imIDGEN((char *)"Delete", drid)))
+    if (ImGui::Button(DB_imIDGEN((char *)"Delete", id)))
     {
-        removeIDB(game, drid);
+        removeIDB(game, id);
     }
     ImGui::SameLine();
-    if (ImGui::Button(DB_imIDGEN((char *)"Select", drid)))
+    if (ImGui::Button(DB_imIDGEN((char *)"Select", id)))
     {
-        sel->id = id;
-        sel->type = S_DECTILE;
+        *sel = id;
     }
 
-    if (sel->id == id)
+    if (*sel == id)
     {
-        switch (sel->type)
-        {
-        case S_DECTILE:
-            ImGui::TextColored(ImVec4{0., 1., 0., 1.}, "Selected!");
-            break;
-        }
+
+        ImGui::TextColored(ImVec4{0., 1., 0., 1.}, "Selected!");
     }
 
     ImGui::TableNextColumn();
@@ -96,210 +212,82 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int drid, drawOIT *sel)
     ImVec2 uv_max = ImVec2(1.0f, 1.0f);
     ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ImGui::Image((void *)(intptr_t)game->texm.textures[game->cmap.decorationsTile[id].tex].texture.glLoc, ImVec2(50, 50), uv_min, uv_max, tint_col, border_col);
+    ImGui::Image((void *)(intptr_t)game->texm.textures[game->cmap.tiles[id].tex].texture.glLoc, ImVec2(50, 50), uv_min, uv_max, tint_col, border_col);
 
     ImGui::TableNextColumn();
 
-    if (ImGui::Button(DB_imIDGEN((char *)"^", drid)))
+    if (ImGui::Button(DB_imIDGEN((char *)"^", id)))
     {
-        if (drid != 0)
+        if (id != 0)
         {
-            std::swap(game->cmap.drawOrder[drid], game->cmap.drawOrder[drid - 1]);
+            std::swap(game->cmap.tiles[id], game->cmap.tiles[id - 1]);
         }
     }
-    if (ImGui::Button(DB_imIDGEN((char *)"V", drid)))
+    if (ImGui::Button(DB_imIDGEN((char *)"V", id)))
     {
-        if (drid != (int)game->cmap.drawOrder.size() - 1)
+        if (id != (int)game->cmap.tiles.size() - 1)
         {
-            std::swap(game->cmap.drawOrder[drid], game->cmap.drawOrder[drid + 1]);
+            std::swap(game->cmap.tiles[id], game->cmap.tiles[id + 1]);
         }
     }
     ImGui::TableNextColumn();
-    ImGui::Text("Pos: %fx%f", game->cmap.decorationsTile[id].pos.x, game->cmap.decorationsTile[id].pos.y);
-    ImGui::Text("Size: %fx%f", game->cmap.decorationsTile[id].scl.x, game->cmap.decorationsTile[id].scl.y);
-    ImGui::Text("Rotation: %f", game->cmap.decorationsTile[id].rot);
+    ImGui::Text("Pos: %fx%f", game->cmap.tiles[id].pos.x, game->cmap.tiles[id].pos.y);
+    ImGui::Text("Size: %fx%f", game->cmap.tiles[id].scl.x, game->cmap.tiles[id].scl.y);
+    ImGui::Text("Rotation: %f", game->cmap.tiles[id].rot);
     // printf("TEST: %s", DB_imIDGEN((char*)"Edit", drid));fflush(NULL);
-    std::string nameds = DB_imIDGEN((char *)"Edit", drid);
+    std::string nameds = DB_imIDGEN((char *)"Edit", id);
     if (ImGui::CollapsingHeader(nameds.c_str()))
     {
 
-        static float *pos[2] = {&game->cmap.decorationsTile[id].pos.x, &game->cmap.decorationsTile[id].pos.y};
-        static float *scl[2] = {&game->cmap.decorationsTile[id].scl.x, &game->cmap.decorationsTile[id].scl.y};
-
-        ImGui::InputText("Name", (char *)game->cmap.decorationsTile[id].tag, 32);
+        static float *pos[2] = {&game->cmap.tiles[id].pos.x, &game->cmap.tiles[id].pos.y};
+        static float *scl[2] = {&game->cmap.tiles[id].scl.x, &game->cmap.tiles[id].scl.y};
+        ImGui::InputText("Name", (char *)game->cmap.tiles[id].tag, 32);
         ImGui::InputFloat2("Position", *pos, "%.3f units");
         ImGui::InputFloat2("Scale", *scl, "%.3f units");
-        ImGui::InputFloat("Rotation", &game->cmap.decorationsTile[id].rot, 0.1, 0.15, "%.3f degrees");
-        ImGui::InputInt("Texture ID", &game->cmap.decorationsTile[id].tex);
+        ImGui::InputFloat("Rotation", &game->cmap.tiles[id].rot, 0.1, 0.15, "%.3f degrees");
+        ImGui::InputInt("Texture ID", &game->cmap.tiles[id].tex);
     }
     ImGui::TableNextColumn();
-    if (game->cmap.decorationsTile[id].scr.exist == 0)
+    std::string vm = DB_imIDGEN((char *)"Physics", id);
+    ImGui::Checkbox(vm.c_str(), &game->cmap.tiles[id].physOn);
+    if(game->cmap.tiles[id].physOn){
+        ImGui::InputFloat( DB_imIDGEN((char *)"Mass", id), &game->cmap.tiles[id].phys.mass);
+    }
+    ImGui::TableNextColumn();
+    if (game->cmap.tiles[id].scr.exist == 0)
     {
         ImGui::Text("No script added.");
-        std::string g = DB_imIDGEN((char *)"Add Script", drid);
+        std::string g = DB_imIDGEN((char *)"Add Script", id);
         if (ImGui::Button(g.c_str()))
         {
-            initScript(&game->cmap.decorationsTile[id].scr);
-            game->cmap.decorationsTile[id].scr.exist = 1;
+            initScript(&game->cmap.tiles[id].scr);
+            game->cmap.tiles[id].scr.exist = 1;
         }
     }
     else
     {
-        std::string g = DB_imIDGEN((char *)"Run Script", drid);
-        std::string a = DB_imIDGEN((char *)"Remove", drid);
+        std::string g = DB_imIDGEN((char *)"Run Script", id);
+        std::string a = DB_imIDGEN((char *)"Remove", id);
         if (ImGui::Button(g.c_str()))
         {
-            runScriptEmb(&game->cmap.decorationsTile[id].scr);
+            runScriptEmb(&game->cmap.tiles[id].scr);
         }
         ImGui::SameLine();
         if (ImGui::Button(a.c_str()))
         {
-            game->cmap.decorationsTile[id].scr.impl = NULL;
-            game->cmap.decorationsTile[id].scr.exist = 0;
+            game->cmap.tiles[id].scr.impl = NULL;
+            game->cmap.tiles[id].scr.exist = 0;
         }
-        ImGui::InputTextMultiline("Edit", (char*)game->cmap.decorationsTile[id].scr.script, IM_ARRAYSIZE(game->cmap.decorationsTile[id].scr.script));
-    }
-}
-
-void map_dragOBJ(GAME *game, drawOIT *item, bool axis)
-{
-    axis = axis;
-    static bool held = false;
-    static int brad = 0;
-    if (!ImGui::IsKeyDown(ImGuiKey_LeftShift))
-    {
-        if (game->cmap.drawOrder.size())
-        {
-            switch (item->type)
-            {
-            case S_DECTILE:
-            {
-                vec2 midpoint = game->cmap.decorationsTile[item->id].pos;
-                midpoint.x = midpoint.x + (game->cmap.decorationsTile[item->id].scl.x / 2.);
-                midpoint.y = midpoint.y + (game->cmap.decorationsTile[item->id].scl.y / 2.);
-                raw_drawBP(game, vec2toGLM(midpoint), glm::vec2(10., 10.), 0., glm::vec3(1., 1., 1.));
-                raw_drawBP(game, glm::vec2(midpoint.x, midpoint.y - 20), glm::vec2(10., 10.), 0., glm::vec3(1., 0., 0.));
-                raw_drawBP(game, glm::vec2(midpoint.x - 20, midpoint.y), glm::vec2(10., 10.), 0., glm::vec3(0., 1., 0.));
-
-                // HELL TIME
-                vec2i mouse;
-                SDL_GetMouseState(&mouse.x, &mouse.y);
-
-                raw_drawBP(game, vec2itoGLM(mouse), glm::vec2(8., 8.), 0., glm::vec3(1., 1., 1.));
-                SDL_Rect phf = {mouse.x, mouse.y, 8, 8};
-                SDL_Rect sax = {(int)midpoint.x, (int)midpoint.y, 10, 10};
-                if (!held)
-                {
-                    if (SDL_HasIntersection(&sax, &phf))
-                    {
-
-                        if (ImGui::IsMouseDown(0))
-                        {
-                            brad = 0;
-                            held = true;
-                        }
-                    }
-
-                    sax = {(int)midpoint.x, (int)midpoint.y - 20, 10, 10};
-                    if (SDL_HasIntersection(&sax, &phf))
-                    {
-
-                        if (ImGui::IsMouseDown(0))
-                        {
-                            brad = 1;
-                            held = true;
-                        }
-                    }
-
-                    sax = {(int)midpoint.x - 20, (int)midpoint.y, 10, 10};
-                    if (SDL_HasIntersection(&sax, &phf))
-                    {
-
-                        if (ImGui::IsMouseDown(0))
-                        {
-                            brad = 2;
-                            held = true;
-                        }
-                    }
-                }
-                else
-                {
-                    vec2 br = vec2itoVec2(mouse);
-                    if (!axis)
-                    {
-                        switch (brad)
-                        {
-                        case 0:
-
-                            br.x -= (game->cmap.decorationsTile[item->id].scl.x / 2.);
-                            br.y -= (game->cmap.decorationsTile[item->id].scl.y / 2.);
-                            game->cmap.decorationsTile[item->id].pos = br;
-                            break;
-                        case 1:
-                            br.y -= (game->cmap.decorationsTile[item->id].scl.y / 2.);
-                            br.y += 20;
-                            br.x = game->cmap.decorationsTile[item->id].pos.x;
-                            game->cmap.decorationsTile[item->id].pos = br;
-                            break;
-                        case 2:
-                            br.x -= (game->cmap.decorationsTile[item->id].scl.x / 2.);
-                            br.x += 20;
-                            br.y = game->cmap.decorationsTile[item->id].pos.y;
-                            game->cmap.decorationsTile[item->id].pos = br;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        switch (brad)
-                        {
-                        case 1:
-                            sax = {(int)game->cmap.decorationsTile[item->id].pos.x, (int)game->cmap.decorationsTile[item->id].pos.y + (int)game->cmap.decorationsTile[item->id].scl.y, (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].scl.y};
-                            if (SDL_HasIntersection(&sax, &phf))
-                            {
-                                game->cmap.decorationsTile[item->id].pos.y += game->cmap.decorationsTile[item->id].scl.y;
-                            }
-                            sax = {(int)game->cmap.decorationsTile[item->id].pos.x, (int)game->cmap.decorationsTile[item->id].pos.y - (int)game->cmap.decorationsTile[item->id].scl.y, (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].scl.y};
-                            if (SDL_HasIntersection(&sax, &phf))
-                            {
-                                game->cmap.decorationsTile[item->id].pos.y -= game->cmap.decorationsTile[item->id].scl.y;
-                            }
-                            break;
-                        case 2:
-                            sax = {(int)game->cmap.decorationsTile[item->id].pos.x + (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].pos.y, (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].scl.y};
-                            if (SDL_HasIntersection(&sax, &phf))
-                            {
-                                game->cmap.decorationsTile[item->id].pos.x += game->cmap.decorationsTile[item->id].scl.x;
-                            }
-                            sax = {(int)game->cmap.decorationsTile[item->id].pos.x - (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].pos.y, (int)game->cmap.decorationsTile[item->id].scl.x, (int)game->cmap.decorationsTile[item->id].scl.y};
-                            if (SDL_HasIntersection(&sax, &phf))
-                            {
-                                game->cmap.decorationsTile[item->id].pos.x -= game->cmap.decorationsTile[item->id].scl.x;
-                            }
-                            break;
-                        }
-                    }
-                    if (ImGui::IsMouseReleased(0))
-                    {
-                        held = false;
-                    }
-                }
-
-                break;
-            }
-            }
-        }
+        ImGui::InputTextMultiline("Edit", (char *)game->cmap.tiles[id].scr.script, IM_ARRAYSIZE(game->cmap.tiles[id].scr.script));
     }
 }
 
 void map_IMGUIMENU(GAME *game)
 {
-
-    static char *items[] = {(char *)"Decoration Tile", (char *)"Collision Tile", (char *)"Collision Box"};
-    static int selEDMOD = S_DECTILE;
     static bool axise = 1;
-    static drawOIT selectedItem = {0, 0};
-    map_dragOBJ(game, &selectedItem, axise);
+    static int selectedItem = 0;
+
+    map_dragOBJ(game, selectedItem, axise);
     if (ImGui::IsKeyDown(ImGuiKey_LeftShift))
     {
 
@@ -307,53 +295,17 @@ void map_IMGUIMENU(GAME *game)
         {
             if (!ImGui::IsAnyItemFocused())
             {
-                switch (selEDMOD)
+
+                for (int i = 0; i < (int)game->cmap.tiles.size(); i++)
                 {
-                case S_DECTILE:
-                {
-                    for (int i = 0; i < (int)game->cmap.decorationsTile.size(); i++)
+                    vec2i mouse;
+                    SDL_GetMouseState(&mouse.x, &mouse.y);
+                    SDL_Rect sax = {(int)game->cmap.tiles[i].pos.x, (int)game->cmap.tiles[i].pos.y, (int)game->cmap.tiles[i].scl.x, (int)game->cmap.tiles[i].scl.y};
+                    SDL_Rect phf = {mouse.x, mouse.y, 10, 10};
+                    if (SDL_HasIntersection(&sax, &phf))
                     {
-                        vec2i mouse;
-                        SDL_GetMouseState(&mouse.x, &mouse.y);
-                        SDL_Rect sax = {(int)game->cmap.decorationsTile[i].pos.x, (int)game->cmap.decorationsTile[i].pos.y, (int)game->cmap.decorationsTile[i].scl.x, (int)game->cmap.decorationsTile[i].scl.y};
-                        SDL_Rect phf = {mouse.x, mouse.y, 10, 10};
-                        if (SDL_HasIntersection(&sax, &phf))
-                        {
-                            selectedItem = {S_DECTILE, i};
-                        }
+                        selectedItem = i;
                     }
-                    break;
-                }
-                case S_COLTILE:
-                {
-                    for (int i = 0; i < (int)game->cmap.collisionTile.size(); i++)
-                    {
-                        vec2i mouse;
-                        SDL_GetMouseState(&mouse.x, &mouse.y);
-                        SDL_Rect sax = {(int)game->cmap.collisionTile[i].pos.x, (int)game->cmap.collisionTile[i].pos.y, (int)game->cmap.collisionTile[i].scl.x, (int)game->cmap.collisionTile[i].scl.y};
-                        SDL_Rect phf = {mouse.x, mouse.y, 10, 10};
-                        if (SDL_HasIntersection(&sax, &phf))
-                        {
-                            selectedItem = {S_COLTILE, i};
-                        }
-                    }
-                    break;
-                }
-                case S_COL:
-                {
-                    for (int i = 0; i < (int)game->cmap.collision.size(); i++)
-                    {
-                        vec2i mouse;
-                        SDL_GetMouseState(&mouse.x, &mouse.y);
-                        SDL_Rect sax = {(int)game->cmap.collision[i].pos.x, (int)game->cmap.collision[i].pos.y, (int)game->cmap.collision[i].scl.x, (int)game->cmap.collision[i].scl.y};
-                        SDL_Rect phf = {mouse.x, mouse.y, 10, 10};
-                        if (SDL_HasIntersection(&sax, &phf))
-                        {
-                            selectedItem = {S_COL, i};
-                        }
-                    }
-                    break;
-                }
                 }
             }
         };
@@ -361,53 +313,93 @@ void map_IMGUIMENU(GAME *game)
 
     ImGui::Begin("MapEditor");
     ImGui::Text("Currently loaded TextureDB: %s", (char *)game->texm.sourcefile);
-    ImGui::Text("Selected Object - %i, %i", selectedItem.type, selectedItem.id);
+    ImGui::Text("Selected Object - %i", selectedItem);
     ImGui::Checkbox("Enable Grid Snap", &axise);
-    ImGui::Combo("Select type", &selEDMOD, items, IM_ARRAYSIZE(items));
+
     if (ImGui::BeginTabBar("Map Editor"))
     {
 
         if (ImGui::BeginTabItem("Add to Scene"))
         {
-            static int itemsel;
+            map_IMGUIMENUBY(game);
 
-            ImGui::Combo("Type", &itemsel, items, IM_ARRAYSIZE(items));
-            switch (itemsel)
-            {
-            case 0:
-                map_eCOL_IMGUIMENU(game);
-                break;
-            }
             ImGui::EndTabItem();
         }
         static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
         if (ImGui::BeginTabItem("Edit"))
         {
-            if (game->cmap.drawOrder.size())
+            if (game->cmap.tiles.size())
             {
-                if (ImGui::BeginTable("edit", 5, flags))
+                if (ImGui::BeginTable("edit", 6, flags))
                 {
                     const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
                     ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
                     ImGui::TableSetupColumn("Preview", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 12.0f);
                     ImGui::TableSetupColumn("Move", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 12.0f);
                     ImGui::TableSetupColumn("Stats", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 18.0f);
+                    ImGui::TableSetupColumn("Phys", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 18.0f);
                     ImGui::TableSetupColumn("Info", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 18.0f);
                     ImGui::TableHeadersRow();
-                    for (int i = 0; i < (int)game->cmap.drawOrder.size(); i++)
+                    for (int i = 0; i < (int)game->cmap.tiles.size(); i++)
                     {
-                        switch (game->cmap.drawOrder[i].type)
-                        {
-                        case S_DECTILE:
-                        {
-                            map_IMGUIDISPLAYDCT(game, game->cmap.drawOrder[i].id, i, &selectedItem);
-                            break;
-                        }
-                        }
+                        map_IMGUIDISPLAYDCT(game, i, &selectedItem);
                     }
                     ImGui::EndTable();
                 }
+            }
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Global Edit"))
+        {
+            ImGui::InputFloat("Gravity", &game->cmap.gravity);
+            if(ImGui::Button("Run Global Script")){
+                runScriptEmb(&game->cmap.globalscr);
+            }
+            ImGui::InputTextMultiline("Global Script", (char*)game->cmap.globalscr.script, IM_ARRAYSIZE(game->cmap.globalscr.script));
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Player Spawn Locations"))
+        {
+            if(ImGui::Button("Add spawn location")){
+                spwn spa;
+                spa.loc = vec2{0.,0.};
+                memcpy(&spa.tag, "hello!", sizeof("hello!"));
+                game->cmap.spawns.push_back(spa);
+            }
+            if (game->cmap.spawns.size())
+            {
+                if (ImGui::BeginTable("locs", 2, flags))
+                {
+                    const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
+                    ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
+                    ImGui::TableSetupColumn("Move", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 12.0f);
+                    ImGui::TableHeadersRow();
+                    for (int i = 0; i < (int)game->cmap.spawns.size(); i++)
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        if(ImGui::Button(DB_imIDGEN((char *)"Erase", i))){
+                            game->cmap.spawns.erase(game->cmap.spawns.begin() + i);
+                        }
+                        ImGui::InputText(DB_imIDGEN((char *)"Name", i), (char*)game->cmap.spawns[i].tag, IM_ARRAYSIZE(game->cmap.spawns[i].tag));
+                        ImGui::TableNextColumn();
+                        float *scl[2] = {&game->cmap.spawns[i].loc.x, &game->cmap.spawns[i].loc.y};
+                        std::string temp = "Set Spawn Pos##" + std::to_string(i);
+                        ImGui::InputFloat2(temp.c_str(), *scl, "%.3f units");
+                        raw_drawBP(game, vec2toGLM(game->cmap.spawns[i].loc), glm::vec2(15), sin(((1 + i) * 10) + SDL_GetTicks() / 100.) * 100., glm::vec3(0, 1., 0));
+                    }
+                    
+                    ImGui::EndTable();
+                }
+            }
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Level Testing"))
+        {
+            ImGui::TextColored(ImVec4{1.,0.6,0., 0.7f + ((float)sin(SDL_GetTicks() / 200.f) / 2.f)}, "Your level will be saved when being tested and will be loaded back on finish");
+            if(!game->cmap.spawns.size()){
+                ImGui::TextColored(ImVec4{1,0,0,1},"Nowhere for player to spawn! Create spawn points in the Player Spawn Locations tab");
             }
             ImGui::EndTabItem();
         }
@@ -417,12 +409,12 @@ void map_IMGUIMENU(GAME *game)
     static char tempolocsave[64] = "";
     ImGui::InputTextWithHint(" ", "rsc/level1.map", tempolocsave, IM_ARRAYSIZE(tempolocsave));
     ImGui::SameLine();
-    if (ImGui::Button("Save DB"))
+    if (ImGui::Button("Save Map"))
     {
         saveMAP(tempolocsave, game);
     }
     ImGui::SameLine();
-    if (ImGui::Button("Load DB"))
+    if (ImGui::Button("Load Map"))
     {
         loadMAP(tempolocsave, game);
     }

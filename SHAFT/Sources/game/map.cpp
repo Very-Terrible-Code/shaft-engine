@@ -7,26 +7,19 @@ void loadMAP(char *name, GAME *game)
     std::ifstream is(name, std::ifstream::binary);
     if (is)
     {
-        game->cmap.decorationsTile.clear();
-        game->cmap.collisionTile.clear();
-        game->cmap.collision.clear();
-        game->cmap.drawOrder.clear();
+        game->cmap.tiles.clear();
 
         //memcpy(&game->texm.sourcefile, name, 64);
 
         mapHeader fh;
 
         is.read(reinterpret_cast<char *>(&fh), sizeof(mapHeader));
+        game->cmap.gravity = fh.gravity;
+        game->cmap.tiles.resize(fh.s_size);
+        game->cmap.spawns.resize(fh.s_spsize);
 
-        game->cmap.decorationsTile.resize(fh.s_dectile);
-        game->cmap.collisionTile.resize(fh.s_coltile);
-        game->cmap.collision.resize(fh.s_col);
-        game->cmap.drawOrder.resize(fh.s_do);
-
-        is.read(reinterpret_cast<char *>(game->cmap.decorationsTile.data()), fh.s_dectile * sizeof(dectile));
-        is.read(reinterpret_cast<char *>(game->cmap.collisionTile.data()), fh.s_coltile * sizeof(coltile));
-        is.read(reinterpret_cast<char *>(game->cmap.collision.data()), fh.s_col * sizeof(col));
-        is.read(reinterpret_cast<char *>(game->cmap.drawOrder.data()), fh.s_do * sizeof(drawOIT));
+        is.read(reinterpret_cast<char *>(game->cmap.tiles.data()), fh.s_size * sizeof(tile));
+        is.read(reinterpret_cast<char *>(game->cmap.spawns.data()), fh.s_spsize * sizeof(spwn));
 
         is.close();
         // load textures
@@ -37,10 +30,12 @@ void loadMAP(char *name, GAME *game)
             loadTextureDB(fh.texloc, game);
             break;
         }
-        for(int i = 0; i < (int)game->cmap.decorationsTile.size(); i++){
-            switch(game->cmap.decorationsTile[i].scr.exist){
+        memcpy(&game->cmap.globalscr, &fh.globalscr, sizeof(fh.globalscr));
+        initScript(&game->cmap.globalscr);
+        for(int i = 0; i < (int)game->cmap.tiles.size(); i++){
+            switch(game->cmap.tiles[i].scr.exist){
                 case 1:
-                initScript(&game->cmap.decorationsTile[i].scr);
+                initScript(&game->cmap.tiles[i].scr);
                 break;
             }
         }
@@ -58,22 +53,18 @@ void saveMAP(char *name, GAME *game)
     if (savedata)
     {
         mapHeader fh;
-        fh.s_dectile = (int)game->cmap.decorationsTile.size();
-        fh.s_coltile = (int)game->cmap.collisionTile.size();
-        fh.s_col = (int)game->cmap.collision.size();
-        fh.s_do = (int)game->cmap.drawOrder.size();
+        fh.s_size = (int)game->cmap.tiles.size();
+        fh.s_spsize = (int)game->cmap.spawns.size();
+        fh.gravity = game->cmap.gravity;
         memcpy(&fh.texloc, &game->texm.sourcefile, 64);
-
+        memcpy(&fh.globalscr.script, &game->cmap.globalscr.script, sizeof(game->cmap.globalscr.script));
         savedata.write(reinterpret_cast<char *>(&fh),
                        sizeof(mapHeader));
-        savedata.write(reinterpret_cast<char *>(&game->cmap.decorationsTile[0]),
-                       sizeof(dectile) * fh.s_dectile);
-        savedata.write(reinterpret_cast<char *>(&game->cmap.collisionTile[0]),
-                       sizeof(coltile) * fh.s_coltile);
-        savedata.write(reinterpret_cast<char *>(&game->cmap.collision[0]),
-                       sizeof(col) * fh.s_col);
-        savedata.write(reinterpret_cast<char *>(&game->cmap.drawOrder[0]),
-                       sizeof(drawOIT) * fh.s_do);
+        savedata.write(reinterpret_cast<char *>(&game->cmap.tiles[0]),
+                       sizeof(tile) * fh.s_size);
+        savedata.write(reinterpret_cast<char *>(&game->cmap.spawns[0]),
+                       sizeof(spwn) * fh.s_spsize);
+
         savedata.close();
     }
     else
@@ -84,48 +75,5 @@ void saveMAP(char *name, GAME *game)
 
 void removeIDB(GAME *game, int id)
 {
-    printf("Deleting %i\n", id);fflush(NULL);
-    switch (game->cmap.drawOrder[id].type)
-    {
-    case S_DECTILE:
-        
-        for(int i = id + 1; i < (int)game->cmap.drawOrder.size(); i++){
-
-            switch(game->cmap.drawOrder[i].type){
-                case S_DECTILE:
-                game->cmap.drawOrder[i].id--;
-                break;
-            }
-        }
-        game->cmap.decorationsTile.erase(game->cmap.decorationsTile.begin() + game->cmap.drawOrder[id].id);
-        game->cmap.drawOrder.erase(game->cmap.drawOrder.begin() + id);
-        break;
-
-    case S_COLTILE:
-        
-        for(int i = id + 1; i < (int)game->cmap.drawOrder.size(); i++){
-
-            switch(game->cmap.drawOrder[i].type){
-                case S_COLTILE:
-                game->cmap.drawOrder[i].id--;
-                break;
-            }
-        }
-        game->cmap.collisionTile.erase(game->cmap.collisionTile.begin() + game->cmap.drawOrder[id].id);
-        game->cmap.drawOrder.erase(game->cmap.drawOrder.begin() + id);
-        break;
-    case S_COL:
-        
-        for(int i = id + 1; i < (int)game->cmap.drawOrder.size(); i++){
-
-            switch(game->cmap.drawOrder[i].type){
-                case S_COL:
-                game->cmap.drawOrder[i].id--;
-                break;
-            }
-        }
-        game->cmap.collision.erase(game->cmap.collision.begin() + game->cmap.drawOrder[id].id);
-        game->cmap.drawOrder.erase(game->cmap.drawOrder.begin() + id);
-        break;
-    }
+    game->cmap.tiles.erase(game->cmap.tiles.begin() + id);
 }

@@ -19,7 +19,7 @@ std::string readFileIntoString(const std::string &path)
     }
     return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 }
-
+#ifdef DEBUG
 void debugCallback(GLenum source, GLenum type, GLuint, GLenum severity,
                    GLsizei, const GLchar *message, const void *)
 {
@@ -76,7 +76,7 @@ void debugCallback(GLenum source, GLenum type, GLuint, GLenum severity,
 
     std::cout << "OpenGL " << typeStr << " [" << srcStr << "]: " << message << std::endl;
 }
-
+#endif
 void initGame(GAME *instance, int width, int height)
 {
     printf("SHAFT Engine 1.00\nhttps://github.com/PipeWarp/SHAFTEng\n");
@@ -108,16 +108,17 @@ void initGame(GAME *instance, int width, int height)
     instance->orgwinres.x = width;
     instance->orgwinres.y = height;
     instance->percs.x = 1;
+
     instance->percs.y = 1;
     instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/texc.frag").c_str());
-    
+    instance->cmap.gravity = 1.;
     instance->gl.screenShader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/fb.frag").c_str());
-
+    initScript(&instance->cmap.globalscr);
     //#ifdef ENABLE_EDITOR
     instance->debugBLOCK.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/rawcol.frag").c_str());
     //#endif
     initRenderer(instance);
-
+    instance->edgameRunning = false;
     instance->gameRunning = true;
     glViewport(0, 0, instance->winres.x, instance->winres.y);
     return;

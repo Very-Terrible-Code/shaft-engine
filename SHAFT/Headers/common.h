@@ -6,11 +6,16 @@
 #include "logic/math.h"
 #include "render/shader.h"
 
-#define S_DECTILE 0
-#define S_COLTILE 1
-#define S_COL 2
 
-typedef struct dectile
+
+typedef struct phsyInfo{
+    float mass;
+    glm::vec2 accel;
+    glm::vec2 vel;
+    glm::vec2 force;
+}physInfo;
+
+typedef struct tile
 {
     vec2 pos;
     vec2 scl;
@@ -19,37 +24,29 @@ typedef struct dectile
     script scr;
     char *tag[32];
     int attc;
-} dectile, coltile;
+    bool physOn;
+    physInfo phys;
+} tile;
 
-typedef struct col
-{
-    vec2 pos;
-    vec2 scl;
-    float rot;
-    script scr;
+typedef struct spwn{
+    vec2 loc;
     char *tag[32];
-    int attc;
-} col;
-typedef struct drawOIT
-{
-    int type;
-    int id;
-} drawOIT;
+}spwn;
+
 typedef struct map
 {
-    std::vector<dectile> decorationsTile;
-    std::vector<coltile> collisionTile;
-    std::vector<col> collision;
-    std::vector<drawOIT> drawOrder;
+    std::vector<tile> tiles;
+    std::vector<spwn> spawns;
     script globalscr;
+    float gravity;
 } map;
 
 typedef struct mapHeader{
-    int s_dectile;
-    int s_coltile;
-    int s_col;
-    int s_do;
+    int s_size;
+    int s_spsize;
+    float gravity;
     char texloc[64];
+    script globalscr;
 }mapHeader;
 
 typedef struct keyStat
@@ -91,7 +88,7 @@ typedef struct openglSet
     Shader screenShader;
 } openglSet;
 
-typedef struct tex
+typedef struct tex5
 {
     unsigned int glLoc;
     char *location[64];
@@ -119,6 +116,13 @@ typedef struct texdb
     char *sourcefile[64];
 } texdb;
 
+typedef struct player{
+    vec2 pos;
+    physInfo phys;
+    int health;
+
+} player;
+
 typedef struct GAME
 {
     SDL_Window *window;
@@ -131,6 +135,8 @@ typedef struct GAME
     map cmap;
     openglSet gl;
     bool gameRunning;
+    bool edgameRunning;
+    player mplay;
 
 //#ifdef ENABLE_EDITOR
     Shader debugBLOCK;

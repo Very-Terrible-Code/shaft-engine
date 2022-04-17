@@ -68,7 +68,7 @@ void fRender(GAME *game)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     game->gl.screenShader.Use();
-    raw_drawTX(game, &game->gl.tecg, vec2itoGLM(game->winres));
+    raw_drawTX(game, &game->gl.tecg, vec2itoGLM(game->orgwinres));
 }
 
 void clearScreen()
@@ -83,27 +83,14 @@ void renderScene(GAME *game)
     game->gl.shader.SetMatrix4("projection", game->gl.projection);
 
     beginRenderFrameBuffer(game);
-    for (int i = 0; i < (int)game->cmap.drawOrder.size(); i++)
+    for (int i = 0; i < (int)game->cmap.tiles.size(); i++)
     {
-        switch (game->cmap.drawOrder[i].type)
-        {
-        case S_DECTILE:
-        {
-            raw_drawSP(game, (GLuint *)&game->texm.textures[game->cmap.decorationsTile[game->cmap.drawOrder[i].id].tex].texture.glLoc,
-                       vec2toGLM(game->cmap.decorationsTile[game->cmap.drawOrder[i].id].pos),
-                       vec2toGLM(game->cmap.decorationsTile[game->cmap.drawOrder[i].id].scl),
-                       game->cmap.decorationsTile[game->cmap.drawOrder[i].id].rot, glm::vec3(1));
-            break;
-        }
-        case S_COLTILE:
-        {
-            raw_drawSP(game, (GLuint *)&game->texm.textures[game->cmap.collisionTile[game->cmap.drawOrder[i].id].tex].texture.glLoc,
-                       vec2toGLM(game->cmap.collisionTile[game->cmap.drawOrder[i].id].pos),
-                       vec2toGLM(game->cmap.collisionTile[game->cmap.drawOrder[i].id].scl),
-                       game->cmap.collisionTile[game->cmap.drawOrder[i].id].rot, glm::vec3(1));
-            break;
-        }
-        }
+
+            raw_drawSP(game, (GLuint *)&game->texm.textures[game->cmap.tiles[i].tex].texture.glLoc,
+                       vec2toGLM(game->cmap.tiles[i].pos),
+                       vec2toGLM(game->cmap.tiles[i].scl),
+                       game->cmap.tiles[i].rot, glm::vec3(1));
+
     }
     endRenderFrameBuffer(game);
     fRender(game);

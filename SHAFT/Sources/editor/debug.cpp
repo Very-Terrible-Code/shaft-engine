@@ -1,4 +1,5 @@
 #include "editor/debug.h"
+#include "logic/game.h"
 #include <string>
 
 void sh_debugMenu(GAME *game)
@@ -40,6 +41,13 @@ void sh_debugMenu(GAME *game)
     {
         SDL_SetWindowFullscreen(game->window, 0);
     }
+    static std::vector<int> lls;
+    if(ImGui::Button("List AABB checks with id 0")){
+        lls.clear();
+        aabbCheck(game, 0, &lls);
+    }
+    for(int i = 0; i < (int)lls.size(); i++)
+        ImGui::Text("%i", lls[i]);
     ImGui::End();
 }
 

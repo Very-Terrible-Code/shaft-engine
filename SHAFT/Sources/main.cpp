@@ -19,26 +19,15 @@ int main()
 
     initImGui(&game);
 
-    // lua test
-    script test;
-    loadAndRunScript(&test, "rsc/test.lua");
-    LuaRef s = getGlobalScr(&test, "testString");
-    LuaRef n = getGlobalScr(&test, "number");
-
-    std::string luaString = s.cast<std::string>();
-    int answer = n.cast<int>();
-
-    std::cout << luaString << std::endl;
-    std::cout << "And here's our number:" << answer << std::endl;
-
     while (game.gameRunning)
     {
 
         processKeys(&game);
-        
-
+        if(game.edgameRunning){
+        gameUpdate(&game);
+        }
         renderScene(&game);
-        #ifdef ENABLE_EDITOR
+#ifdef ENABLE_EDITOR
 
         ImGuiBeginRender(&game);
 

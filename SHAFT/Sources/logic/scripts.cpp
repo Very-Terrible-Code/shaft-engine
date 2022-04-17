@@ -1,4 +1,5 @@
 #include "logic/scripts.h"
+#include "logic/math.h"
 
 void loadAndRunScript(script *pscript, const char *location)
 {
@@ -15,7 +16,6 @@ void initScript(script *pscript)
     pscript->impl = luaL_newstate();
     pscript->running = true;
     luaL_openlibs(pscript->impl);
-
 
 }
 
