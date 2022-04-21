@@ -7,7 +7,8 @@
 #include "render/render.h"
 #include "input/handler.h"
 #include "game/map.h"
-#include "logic/game.h"
+#include "game/game.h"
+
 
 #ifdef ENABLE_EDITOR
 #include "editor/debug.h"

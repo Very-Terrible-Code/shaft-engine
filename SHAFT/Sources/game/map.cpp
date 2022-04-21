@@ -55,7 +55,7 @@ void saveMAP(char *name, GAME *game)
         mapHeader fh;
         fh.s_size = (int)game->cmap.tiles.size();
         fh.s_spsize = (int)game->cmap.spawns.size();
-        fh.gravity = game->cmap.gravity;
+        fh.gravity.y = game->cmap.gravity.y;
         memcpy(&fh.texloc, &game->texm.sourcefile, 64);
         memcpy(&fh.globalscr.script, &game->cmap.globalscr.script, sizeof(game->cmap.globalscr.script));
         savedata.write(reinterpret_cast<char *>(&fh),

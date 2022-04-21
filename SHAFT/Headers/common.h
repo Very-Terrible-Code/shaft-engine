@@ -1,18 +1,23 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
-
 #include "logic/scripts.h"
 #include "logic/math.h"
 #include "render/shader.h"
+#include <chipmunk/chipmunk.h>
 
-
+#define STATIC 0
+#define DYNAMIC 1
 
 typedef struct phsyInfo{
-    float mass;
-    glm::vec2 accel;
-    glm::vec2 vel;
-    glm::vec2 force;
+        bool physOn;
+        int dynst;
+        cpFloat mass;
+        cpFloat friction;
+        cpBody *body;
+        cpShape *shape;
+        cpFloat inert;
+
 }physInfo;
 
 typedef struct tile
@@ -24,8 +29,8 @@ typedef struct tile
     script scr;
     char *tag[32];
     int attc;
-    bool physOn;
     physInfo phys;
+    int id;
 } tile;
 
 typedef struct spwn{
@@ -38,13 +43,13 @@ typedef struct map
     std::vector<tile> tiles;
     std::vector<spwn> spawns;
     script globalscr;
-    float gravity;
+    cpVect gravity;
 } map;
 
 typedef struct mapHeader{
     int s_size;
     int s_spsize;
-    float gravity;
+    cpVect gravity;
     char texloc[64];
     script globalscr;
 }mapHeader;
@@ -80,6 +85,8 @@ typedef struct openglSet
     glm::mat4 projection;
     GLuint quadVAO;
     Shader shader;
+    float deltaTime;
+    float lastframe;
 
     unsigned int MSFBO, FBO; // MSFBO = Multisampled FBO. FBO is regular, used for blitting MS color-buffer to texture
     unsigned int RBO; // RBO is used for multisampled color buffer
@@ -88,7 +95,7 @@ typedef struct openglSet
     Shader screenShader;
 } openglSet;
 
-typedef struct tex5
+typedef struct tex
 {
     unsigned int glLoc;
     char *location[64];
@@ -119,6 +126,7 @@ typedef struct texdb
 typedef struct player{
     vec2 pos;
     physInfo phys;
+
     int health;
 
 } player;
@@ -132,8 +140,10 @@ typedef struct GAME
     vec2i winres;
     vec2i orgwinres;
     vec2 percs;
+    int fps;
     map cmap;
     openglSet gl;
+    cpSpace *world;
     bool gameRunning;
     bool edgameRunning;
     player mplay;

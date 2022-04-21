@@ -1,14 +1,14 @@
-#include "logic/game.h"
+#include "game/game.h"
 
 void gameUpdate(GAME *game)
 {
-    game = game;
+    float currentFrame = SDL_GetTicks64();
+    game->gl.deltaTime = currentFrame - game->gl.lastframe;
+    game->gl.lastframe = currentFrame;  
+    physUpdate(game);
 }
 
-void physUpdate(GAME *game)
-{
-    game = game;
-}
+
 
 void aabbCheck(GAME *game, int item, std::vector<int> *collist)
 {
@@ -23,5 +23,13 @@ void aabbCheck(GAME *game, int item, std::vector<int> *collist)
                 collist->push_back(i);
             }
         }
+    }
+    SDL_Rect ibec = {(int)game->mplay.pos.x,
+                     (int)game->mplay.pos.y,
+                     10,
+                     40};
+    if (SDL_HasIntersection(&itemrec, &ibec))
+    {
+        collist->push_back(-1);
     }
 }

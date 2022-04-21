@@ -47,7 +47,7 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
                                ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
                                ${VENDORS_SOURCES} )
 
-target_link_libraries(${PROJECT_NAME} lua glad glm SDL2 -lm -lc
+target_link_libraries(${PROJECT_NAME} lua glad glm SDL2 chipmunk -lm -lc
                       ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
 
 

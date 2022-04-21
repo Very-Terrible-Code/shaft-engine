@@ -1,5 +1,5 @@
 #include "editor/debug.h"
-#include "logic/game.h"
+#include "game/game.h"
 #include <string>
 
 void sh_debugMenu(GAME *game)
@@ -41,6 +41,7 @@ void sh_debugMenu(GAME *game)
     {
         SDL_SetWindowFullscreen(game->window, 0);
     }
+    ImGui::Text("Delta time: %f", game->gl.deltaTime);
     static std::vector<int> lls;
     if(ImGui::Button("List AABB checks with id 0")){
         lls.clear();

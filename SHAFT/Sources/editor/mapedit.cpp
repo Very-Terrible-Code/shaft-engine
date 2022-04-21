@@ -2,6 +2,7 @@
 #include "editor/mapedit.h"
 #include "game/map.h"
 #include "render/render.h"
+#include "game/phys.h"
 
 void map_dragOBJ(GAME *game, int item, bool axis)
 {
@@ -171,9 +172,10 @@ void map_IMGUIMENUBY(GAME *game)
             base.scl.y = scl[1];
             base.rot = dct.rot;
             base.attc = -1;
-            base.physOn = false;
+            base.phys.physOn = false;
             base.scr.impl = NULL;
             base.scr.exist = 0;
+            base.id = (int)game->cmap.tiles.size() + 1;
             base.tex = (unsigned int)tex;
             memcpy(&base.tag, tag, strlen(tag) + 1);
             game->cmap.tiles.push_back(base);
@@ -249,9 +251,19 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int *sel)
     }
     ImGui::TableNextColumn();
     std::string vm = DB_imIDGEN((char *)"Physics", id);
-    ImGui::Checkbox(vm.c_str(), &game->cmap.tiles[id].physOn);
-    if(game->cmap.tiles[id].physOn){
-        ImGui::InputFloat( DB_imIDGEN((char *)"Mass", id), &game->cmap.tiles[id].phys.mass);
+    ImGui::Checkbox(vm.c_str(), &game->cmap.tiles[id].phys.physOn);
+    if (game->cmap.tiles[id].phys.physOn)
+    {
+        //ImGui::InputFloat(DB_imIDGEN((char *)"Mass", id), &game->cmap.tiles[id].phys.mass);
+        std::string as = DB_imIDGEN((char *)"Static", id);
+        std::string ad = DB_imIDGEN((char *)"Dynamic", id);
+        std::string ms = DB_imIDGEN((char *)"Mass", id);
+        std::string md = DB_imIDGEN((char *)"Friction", id);
+        if(ImGui::Button(as.c_str())){game->cmap.tiles[id].phys.dynst = STATIC;}
+        if(ImGui::Button(ad.c_str())){game->cmap.tiles[id].phys.dynst = DYNAMIC;}
+
+        ImGui::InputFloat(ms.c_str(), (float*)&game->cmap.tiles[id].phys.mass);
+        ImGui::InputFloat(md.c_str(), (float*)&game->cmap.tiles[id].phys.friction);
     }
     ImGui::TableNextColumn();
     if (game->cmap.tiles[id].scr.exist == 0)
@@ -286,6 +298,7 @@ void map_IMGUIMENU(GAME *game)
 {
     static bool axise = 1;
     static int selectedItem = 0;
+    static char tempolocsave[64] = "";
 
     map_dragOBJ(game, selectedItem, axise);
     if (ImGui::IsKeyDown(ImGuiKey_LeftShift))
@@ -352,18 +365,20 @@ void map_IMGUIMENU(GAME *game)
         }
         if (ImGui::BeginTabItem("Global Edit"))
         {
-            ImGui::InputFloat("Gravity", &game->cmap.gravity);
-            if(ImGui::Button("Run Global Script")){
+            //ImGui::InputFloat("Gravity", (float*)&game->cmap.gravity.y);
+            if (ImGui::Button("Run Global Script"))
+            {
                 runScriptEmb(&game->cmap.globalscr);
             }
-            ImGui::InputTextMultiline("Global Script", (char*)game->cmap.globalscr.script, IM_ARRAYSIZE(game->cmap.globalscr.script));
+            ImGui::InputTextMultiline("Global Script", (char *)game->cmap.globalscr.script, IM_ARRAYSIZE(game->cmap.globalscr.script));
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Player Spawn Locations"))
         {
-            if(ImGui::Button("Add spawn location")){
+            if (ImGui::Button("Add spawn location"))
+            {
                 spwn spa;
-                spa.loc = vec2{0.,0.};
+                spa.loc = vec2{0., 0.};
                 memcpy(&spa.tag, "hello!", sizeof("hello!"));
                 game->cmap.spawns.push_back(spa);
             }
@@ -379,17 +394,18 @@ void map_IMGUIMENU(GAME *game)
                     {
                         ImGui::TableNextRow();
                         ImGui::TableNextColumn();
-                        if(ImGui::Button(DB_imIDGEN((char *)"Erase", i))){
+                        if (ImGui::Button(DB_imIDGEN((char *)"Erase", i)))
+                        {
                             game->cmap.spawns.erase(game->cmap.spawns.begin() + i);
                         }
-                        ImGui::InputText(DB_imIDGEN((char *)"Name", i), (char*)game->cmap.spawns[i].tag, IM_ARRAYSIZE(game->cmap.spawns[i].tag));
+                        ImGui::InputText(DB_imIDGEN((char *)"Name", i), (char *)game->cmap.spawns[i].tag, IM_ARRAYSIZE(game->cmap.spawns[i].tag));
                         ImGui::TableNextColumn();
                         float *scl[2] = {&game->cmap.spawns[i].loc.x, &game->cmap.spawns[i].loc.y};
                         std::string temp = "Set Spawn Pos##" + std::to_string(i);
                         ImGui::InputFloat2(temp.c_str(), *scl, "%.3f units");
                         raw_drawBP(game, vec2toGLM(game->cmap.spawns[i].loc), glm::vec2(15), sin(((1 + i) * 10) + SDL_GetTicks() / 100.) * 100., glm::vec3(0, 1., 0));
                     }
-                    
+
                     ImGui::EndTable();
                 }
             }
@@ -397,35 +413,59 @@ void map_IMGUIMENU(GAME *game)
         }
         if (ImGui::BeginTabItem("Level Testing"))
         {
-            ImGui::TextColored(ImVec4{1.,0.6,0., 0.7f + ((float)sin(SDL_GetTicks() / 200.f) / 2.f)}, "Your level will be saved when being tested and will be loaded back on finish");
-            if(!game->cmap.spawns.size()){
-                ImGui::TextColored(ImVec4{1,0,0,1},"Nowhere for player to spawn! Create spawn points in the Player Spawn Locations tab");
+            ImGui::TextColored(ImVec4{1., 0.6, 0., 0.7f + ((float)sin(SDL_GetTicks() / 200.f) / 2.f)}, "Your level will be saved when being tested and will be loaded back on finish");
+            if (!game->cmap.spawns.size())
+            {
+                ImGui::TextColored(ImVec4{1, 0, 0, 1}, "Nowhere for player to spawn! Create spawn points in the Player Spawn Locations tab");
+            }
+            else
+            {
+                static int bruh;
+                ImGui::InputInt("Spawn Point", &bruh);
+                if (ImGui::Button("Start/Stop Testing"))
+                {
+                    if (game->edgameRunning == false)
+                    {
+                        saveMAP(tempolocsave, game);
+                        physInit(game);
+                        game->edgameRunning = true;
+                    }
+                    else
+                    {
+                        loadMAP(tempolocsave, game);
+                        game->edgameRunning = false;
+                    }
+                }
+            }
+
+            if (game->edgameRunning == true)
+            {
+                ImGui::SameLine();
+                ImGui::Text("Test Running...");
+                ImGui::Text("Pos:%fx%f", game->mplay.pos.x, game->mplay.pos.y);
             }
             ImGui::EndTabItem();
         }
+
         ImGui::EndTabBar();
     }
+
     ImGui::Separator();
-    static char tempolocsave[64] = "";
-    ImGui::InputTextWithHint(" ", "rsc/level1.map", tempolocsave, IM_ARRAYSIZE(tempolocsave));
-    ImGui::SameLine();
-    if (ImGui::Button("Save Map"))
+
+    if (game->edgameRunning == false)
     {
-        saveMAP(tempolocsave, game);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Load Map"))
-    {
-        loadMAP(tempolocsave, game);
+        ImGui::InputTextWithHint(" ", "rsc/level1.map", tempolocsave, IM_ARRAYSIZE(tempolocsave));
+        ImGui::SameLine();
+        if (ImGui::Button("Save Map"))
+        {
+            saveMAP(tempolocsave, game);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load Map"))
+        {
+            loadMAP(tempolocsave, game);
+        }
     }
 
     ImGui::End();
-}
-
-bool overlap(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2)
-{
-    return ((x1 >= x2 && x1 <= x2 + w2 - 1 && y1 >= y2 && y1 <= y2 + h2 - 1) ||
-            (x1 + w1 - 1 >= x2 && x1 + w1 - 1 <= x2 + w2 - 1 && y1 >= y2 && y1 <= y2 + h2 - 1) ||
-            (x1 >= x2 && x1 <= x2 + w2 - 1 && y1 + h1 - 1 >= y2 && y1 + h1 - 1 <= y2 + h2 - 1) ||
-            (x1 + w1 - 1 >= x2 && x1 + w1 - 1 <= x2 + w2 - 1 && y1 + h1 - 1 >= y2 && y1 + h1 - 1 <= y2 + h2 - 1));
 }

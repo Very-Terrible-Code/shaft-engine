@@ -92,6 +92,10 @@ void renderScene(GAME *game)
                        game->cmap.tiles[i].rot, glm::vec3(1));
 
     }
+    if (game->edgameRunning)
+    {
+        raw_drawBP(game, vec2toGLM(game->mplay.pos), glm::vec2(10, 40), 0., glm::vec3(0.15));
+    }
     endRenderFrameBuffer(game);
     fRender(game);
 }

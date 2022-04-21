@@ -6,8 +6,6 @@
 
 #include <iostream>
 
-
-
 #define WinWidth 1280
 #define WinHeight 720
 
@@ -21,12 +19,14 @@ int main()
 
     while (game.gameRunning)
     {
-
         processKeys(&game);
-        if(game.edgameRunning){
-        gameUpdate(&game);
+        if (game.edgameRunning)
+        {
+            gameUpdate(&game);
         }
+
         renderScene(&game);
+
 #ifdef ENABLE_EDITOR
 
         ImGuiBeginRender(&game);
@@ -36,10 +36,15 @@ int main()
         tex_IMGUIMENU(&game);
 
         map_IMGUIMENU(&game);
-        
+
         ImGuiEndRender();
-    
+
 #endif
+
+        if (game.gl.deltaTime < 16) {
+            SDL_Delay(16 - game.gl.deltaTime);
+        }
+
         SDL_GL_SwapWindow(game.window);
     }
 
