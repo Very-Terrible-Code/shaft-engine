@@ -201,6 +201,13 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int *sel)
     if (ImGui::Button(DB_imIDGEN((char *)"Delete", id)))
     {
         removeIDB(game, id);
+        switch(game->cmap.tiles.size()){
+        case 0:
+        break;
+        default:
+        *sel -= 1;
+        break;
+        }
     }
     ImGui::SameLine();
     if (ImGui::Button(DB_imIDGEN((char *)"Select", id)))
@@ -214,7 +221,8 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int *sel)
         ImGui::TextColored(ImVec4{0., 1., 0., 1.}, "Selected!");
     }
     std::string dw = DB_imIDGEN((char *)"Duplicate", id);
-    if(ImGui::Button(dw.c_str())){
+    if (ImGui::Button(dw.c_str()))
+    {
         game->cmap.tiles.push_back(game->cmap.tiles[id]);
     }
 
@@ -274,23 +282,30 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int *sel)
         std::string ad = DB_imIDGEN((char *)"Dynamic", id);
         std::string ms = DB_imIDGEN((char *)"Mass", id);
         std::string md = DB_imIDGEN((char *)"Friction", id);
-        if(ImGui::Button(as.c_str())){game->cmap.tiles[id].phys.dynst = DYNAMIC;}
-         ImGui::SameLine();
-        if(ImGui::Button(ad.c_str())){game->cmap.tiles[id].phys.dynst = STATIC;}
-        switch(game->cmap.tiles[id].phys.dynst){
-            case 1:
+        if (ImGui::Button(as.c_str()))
+        {
+            game->cmap.tiles[id].phys.dynst = DYNAMIC;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(ad.c_str()))
+        {
+            game->cmap.tiles[id].phys.dynst = STATIC;
+        }
+        switch (game->cmap.tiles[id].phys.dynst)
+        {
+        case 1:
             ImGui::Text("Set to: Static");
             break;
-            case 0:
+        case 0:
             ImGui::Text("Set to: Dynamic");
             break;
-            default:
+        default:
             ImGui::Text("Set to: None, somehow");
             break;
         }
-        ImGui::InputFloat(ms.c_str(), (float*)&game->cmap.tiles[id].phys.mass);
+        ImGui::InputFloat(ms.c_str(), (float *)&game->cmap.tiles[id].phys.mass);
 
-        ImGui::InputFloat(md.c_str(), (float*)&game->cmap.tiles[id].phys.friction);
+        ImGui::InputFloat(md.c_str(), (float *)&game->cmap.tiles[id].phys.friction);
     }
     ImGui::TableNextColumn();
     if (game->cmap.tiles[id].scr.exist == 0)
