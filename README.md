@@ -2,7 +2,7 @@
 
 ### This is still work-in-porgress.
 ### This currently compiles into the level editor 
-### In the future this may compile into library.
+### In the future this may compile into a library.
 
 clone recursivley.
 
