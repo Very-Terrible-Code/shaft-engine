@@ -177,6 +177,11 @@ void map_IMGUIMENUBY(GAME *game)
             base.scr.exist = 0;
             base.id = (int)game->cmap.tiles.size() + 1;
             base.tex = (unsigned int)tex;
+
+            base.phys.dynst = 0;
+            base.phys.friction = 0.;
+            base.phys.mass = 0.;
+
             memcpy(&base.tag, tag, strlen(tag) + 1);
             game->cmap.tiles.push_back(base);
         }
@@ -208,6 +213,10 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int *sel)
 
         ImGui::TextColored(ImVec4{0., 1., 0., 1.}, "Selected!");
     }
+    std::string dw = DB_imIDGEN((char *)"Duplicate", id);
+    if(ImGui::Button(dw.c_str())){
+        game->cmap.tiles.push_back(game->cmap.tiles[id]);
+    }
 
     ImGui::TableNextColumn();
     ImVec2 uv_min = ImVec2(0.0f, 0.0f);
@@ -236,18 +245,23 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int *sel)
     ImGui::Text("Pos: %fx%f", game->cmap.tiles[id].pos.x, game->cmap.tiles[id].pos.y);
     ImGui::Text("Size: %fx%f", game->cmap.tiles[id].scl.x, game->cmap.tiles[id].scl.y);
     ImGui::Text("Rotation: %f", game->cmap.tiles[id].rot);
-    // printf("TEST: %s", DB_imIDGEN((char*)"Edit", drid));fflush(NULL);
+
     std::string nameds = DB_imIDGEN((char *)"Edit", id);
     if (ImGui::CollapsingHeader(nameds.c_str()))
     {
 
-        static float *pos[2] = {&game->cmap.tiles[id].pos.x, &game->cmap.tiles[id].pos.y};
-        static float *scl[2] = {&game->cmap.tiles[id].scl.x, &game->cmap.tiles[id].scl.y};
-        ImGui::InputText("Name", (char *)game->cmap.tiles[id].tag, 32);
-        ImGui::InputFloat2("Position", *pos, "%.3f units");
-        ImGui::InputFloat2("Scale", *scl, "%.3f units");
-        ImGui::InputFloat("Rotation", &game->cmap.tiles[id].rot, 0.1, 0.15, "%.3f degrees");
-        ImGui::InputInt("Texture ID", &game->cmap.tiles[id].tex);
+        float *pos[2] = {&game->cmap.tiles[id].pos.x, &game->cmap.tiles[id].pos.y};
+        float *scl[2] = {&game->cmap.tiles[id].scl.x, &game->cmap.tiles[id].scl.y};
+        std::string bs = DB_imIDGEN((char *)"Name", id);
+        std::string bd = DB_imIDGEN((char *)"Position", id);
+        std::string ba = DB_imIDGEN((char *)"Scale", id);
+        std::string bz = DB_imIDGEN((char *)"Rotation", id);
+        std::string bt = DB_imIDGEN((char *)"Texture ID", id);
+        ImGui::InputText(bs.c_str(), (char *)game->cmap.tiles[id].tag, 32);
+        ImGui::InputFloat2(bd.c_str(), *pos, "%.3f units");
+        ImGui::InputFloat2(ba.c_str(), *scl, "%.3f units");
+        ImGui::InputFloat(bz.c_str(), &game->cmap.tiles[id].rot, 0.1, 0.15, "%.3f degrees");
+        ImGui::InputInt(bt.c_str(), &game->cmap.tiles[id].tex);
     }
     ImGui::TableNextColumn();
     std::string vm = DB_imIDGEN((char *)"Physics", id);
@@ -255,14 +269,27 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int *sel)
     if (game->cmap.tiles[id].phys.physOn)
     {
         //ImGui::InputFloat(DB_imIDGEN((char *)"Mass", id), &game->cmap.tiles[id].phys.mass);
+
         std::string as = DB_imIDGEN((char *)"Static", id);
         std::string ad = DB_imIDGEN((char *)"Dynamic", id);
         std::string ms = DB_imIDGEN((char *)"Mass", id);
         std::string md = DB_imIDGEN((char *)"Friction", id);
-        if(ImGui::Button(as.c_str())){game->cmap.tiles[id].phys.dynst = STATIC;}
-        if(ImGui::Button(ad.c_str())){game->cmap.tiles[id].phys.dynst = DYNAMIC;}
-
+        if(ImGui::Button(as.c_str())){game->cmap.tiles[id].phys.dynst = DYNAMIC;}
+         ImGui::SameLine();
+        if(ImGui::Button(ad.c_str())){game->cmap.tiles[id].phys.dynst = STATIC;}
+        switch(game->cmap.tiles[id].phys.dynst){
+            case 1:
+            ImGui::Text("Set to: Static");
+            break;
+            case 0:
+            ImGui::Text("Set to: Dynamic");
+            break;
+            default:
+            ImGui::Text("Set to: None, somehow");
+            break;
+        }
         ImGui::InputFloat(ms.c_str(), (float*)&game->cmap.tiles[id].phys.mass);
+
         ImGui::InputFloat(md.c_str(), (float*)&game->cmap.tiles[id].phys.friction);
     }
     ImGui::TableNextColumn();
