@@ -148,14 +148,22 @@ void initGame(GAME *instance, int width, int height)
 
 void initImGui(GAME *game)
 {
+    // Check version
     IMGUI_CHECKVERSION();
+
+    // Create ImGui
     ImGui::CreateContext();
+    // Retrieves variables to display
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
+    // Style
+    // TODO: Look nice SHFT-12
+    // https://www.unknowncheats.me/forum/c-and-c-/189635-imgui-style-settings.html
     ImGui::StyleColorsDark();
 
+    // OpenGL ImGui integration initialisation
     ImGui_ImplSDL2_InitForOpenGL(game->window, game->context);
     ImGui_ImplOpenGL3_Init();
 }
