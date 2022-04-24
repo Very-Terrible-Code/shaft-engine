@@ -22,15 +22,20 @@ typedef struct phsyInfo{
 
 typedef struct tile
 {
+    // Position
     vec2 pos;
+    // Scale
     vec2 scl;
+    // Rotation
     float rot;
+    // Texture
     int tex;
+    // Script
     script scr;
+    // Name
     char *tag[32];
-    int attc;
+    // Chipmunk 2D info
     physInfo phys;
-    int id;
 } tile;
 
 typedef struct spwn{
@@ -95,6 +100,7 @@ typedef struct openglSet
     Shader screenShader;
 } openglSet;
 
+// Texture
 typedef struct tex
 {
     unsigned int glLoc;
@@ -109,10 +115,11 @@ typedef struct texdbheader
     int texsize;
 } texdbheader;
 
+// Texture with tag
 typedef struct tagtex
 {
     tex texture;
-    // int id;
+    // Name
     char *tag[64];
 } tagtex;
 
@@ -123,6 +130,7 @@ typedef struct texdb
     char *sourcefile[64];
 } texdb;
 
+// Player object
 typedef struct player{
     vec2 pos;
     physInfo phys;
@@ -131,21 +139,33 @@ typedef struct player{
 
 } player;
 
+// Game instance
 typedef struct GAME
 {
+    // SDL2 Window
     SDL_Window *window;
+    // Stores states associated with the OpenGL instance
     SDL_GLContext context;
     inHandle input;
+    // Texture database
     texdb texm;
+    // Window resolutions
     vec2i winres;
+    // Original window resolution
     vec2i orgwinres;
-    vec2 percs;
+    // Current FPS of game
     int fps;
+    // The map
     map cmap;
+    // Stores random OpenGL stuff
     openglSet gl;
+    // Part of Chipmunk 2D - essentially a physics environment
     cpSpace *world;
+    // If application is running
     bool gameRunning;
+    // If game is running in editor (ie. when start/stop testing is pressed)
     bool edgameRunning;
+    // The player object
     player mplay;
 
 //#ifdef ENABLE_EDITOR
