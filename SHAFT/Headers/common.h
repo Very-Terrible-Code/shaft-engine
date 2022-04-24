@@ -51,6 +51,7 @@ typedef struct map
     cpVect gravity;
 } map;
 
+// Header section of map file. Stores gravity and global scripts etc.
 typedef struct mapHeader{
     int s_size;
     int s_spsize;

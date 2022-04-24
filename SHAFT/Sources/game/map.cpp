@@ -13,16 +13,20 @@ void loadMAP(char *name, GAME *game)
 
         mapHeader fh;
 
+        // Load header
         is.read(reinterpret_cast<char *>(&fh), sizeof(mapHeader));
+        // Interpret header
         game->cmap.gravity = fh.gravity;
         game->cmap.tiles.resize(fh.s_size);
         game->cmap.spawns.resize(fh.s_spsize);
 
+        // Load tiles
         is.read(reinterpret_cast<char *>(game->cmap.tiles.data()), fh.s_size * sizeof(tile));
+        // Load spawn locations
         is.read(reinterpret_cast<char *>(game->cmap.spawns.data()), fh.s_spsize * sizeof(spwn));
 
         is.close();
-        // load textures
+        // Load textures
         switch(strcmp((char*)game->texm.sourcefile, fh.texloc)){
             case 0:
             break;
@@ -31,8 +35,10 @@ void loadMAP(char *name, GAME *game)
             break;
         }
         memcpy(&game->cmap.globalscr, &fh.globalscr, sizeof(fh.globalscr));
-        initScript(&game->cmap.globalscr);
-        for(int i = 0; i < (int)game->cmap.tiles.size(); i++){
+
+        // Init scripts
+        initScript(&game->cmap.globalscr); // Global
+        for(int i = 0; i < (int)game->cmap.tiles.size(); i++){ // Tile scripts
             switch(game->cmap.tiles[i].scr.exist){
                 case 1:
                 initScript(&game->cmap.tiles[i].scr);
@@ -46,12 +52,18 @@ void loadMAP(char *name, GAME *game)
     }
 }
 
+// @param name Name of file
+// @param game Game instance
 void saveMAP(char *name, GAME *game)
 {
+    // Open file
     std::ofstream savedata;
     savedata.open(name, std::ofstream::binary);
+
+    // If file opened
     if (savedata)
     {
+        //  Headers
         mapHeader fh;
         fh.s_size = (int)game->cmap.tiles.size();
         fh.s_spsize = (int)game->cmap.spawns.size();
@@ -60,8 +72,11 @@ void saveMAP(char *name, GAME *game)
         memcpy(&fh.globalscr.script, &game->cmap.globalscr.script, sizeof(game->cmap.globalscr.script));
         savedata.write(reinterpret_cast<char *>(&fh),
                        sizeof(mapHeader));
+        
+        // Tiles
         savedata.write(reinterpret_cast<char *>(&game->cmap.tiles[0]),
                        sizeof(tile) * fh.s_size);
+        // Spawn locations
         savedata.write(reinterpret_cast<char *>(&game->cmap.spawns[0]),
                        sizeof(spwn) * fh.s_spsize);
 
