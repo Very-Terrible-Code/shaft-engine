@@ -2,6 +2,8 @@
 #include "logic/math.h"
 #include "common.h"
 
+// TODO: Someone who understands OpenGL, please comment this file. Would be hugely appreciated!
+
 void initRenderer(GAME *game)
 {
 
