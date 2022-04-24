@@ -407,7 +407,8 @@ void map_IMGUIMENU(GAME *game)
         }
         if (ImGui::BeginTabItem("Global Edit"))
         {
-            //ImGui::InputFloat("Gravity", (float*)&game->cmap.gravity.y);
+            //ImGui::InputFloat("XlGravity", (float*)(double*)&game->cmap.gravity.y);
+            ImGui::InputDouble("XP Gravity", &game->cmap.gravity.y);
             if (ImGui::Button("Run Global Script"))
             {
                 runScriptEmb(&game->cmap.globalscr);

@@ -108,8 +108,8 @@ void initGame(GAME *instance, int width, int height)
     instance->orgwinres.x = width;
     instance->orgwinres.y = height;
     instance->percs.x = 1;
-    instance->cmap.gravity.x = 0.f;
-    instance->cmap.gravity.y = -100.f;
+    instance->cmap.gravity.x = (double)0.0;
+    instance->cmap.gravity.y = (double)-100.0;
     instance->percs.y = 1;
     instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/texc.frag").c_str());
     instance->gl.screenShader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/fb.frag").c_str());
