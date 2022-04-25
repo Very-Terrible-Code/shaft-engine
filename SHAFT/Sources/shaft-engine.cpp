@@ -118,8 +118,8 @@ void initGame(GAME *instance, int width, int height)
     instance->orgwinres.y = height;
 
     // Chipmunk2D gravity
-    instance->cmap.gravity.x = 0.f;
-    instance->cmap.gravity.y = -100.f;
+    instance->cmap.gravity.x = (double)0.0;
+    instance->cmap.gravity.y = (double)-100.0;
 
     // General purpose rendering shader
     instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/texc.frag").c_str());
