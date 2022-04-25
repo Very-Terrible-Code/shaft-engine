@@ -1,6 +1,7 @@
 #include "editor/debug.h"
 #include "textures/manager.h"
 
+// ImGui regular GUI setup
 void tex_IMGUIMENU(GAME *game)
 {
     ImGui::Begin("Texture Database Manager");

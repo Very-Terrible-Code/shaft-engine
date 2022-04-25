@@ -11,6 +11,7 @@ void map_dragOBJ(GAME *game, int item, bool axis)
     static int brad = 0;
     if (!ImGui::IsKeyDown(ImGuiKey_LeftShift))
     {
+		// If there are tiles in game
         if (game->cmap.tiles.size())
         {
 
@@ -334,6 +335,7 @@ void map_IMGUIDISPLAYDCT(GAME *game, int id, int *sel)
     }
 }
 
+// ImGui Gui setup
 void map_IMGUIMENU(GAME *game)
 {
     static bool axise = 1;
