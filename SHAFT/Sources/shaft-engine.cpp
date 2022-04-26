@@ -8,6 +8,7 @@
 #include "imgui_impl_sdl.h"
 #include <glad/glad.h>
 
+// Utility function to read file to string
 std::string readFileIntoString(const std::string &path)
 {
     std::ifstream input_file(path);
@@ -84,14 +85,18 @@ void initGame(GAME *instance, int width, int height)
 #ifdef SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 #endif
+    // Initialize SDL2
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         SDL_Log("SDL_Init Error: %s\n", SDL_GetError());
         exit(0);
     }
+    // Create SDL window and context
     instance->window = SDL_CreateWindow("SHAFT", 0, 0, width, height, SDL_WINDOW_OPENGL + SDL_WINDOW_RESIZABLE);
     instance->context = SDL_GL_CreateContext(instance->window);
+    // Load OpenGL functions
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+    // VSync
     SDL_GL_SetSwapInterval(1);
 #ifdef DEBUG
     glEnable(GL_DEBUG_OUTPUT);
@@ -100,41 +105,65 @@ void initGame(GAME *instance, int width, int height)
                           GL_TRUE);
     glDebugMessageCallback(debugCallback, nullptr);
 #endif
+
+    // Anti-aliasing MSAA
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
     glEnable(GL_MULTISAMPLE);
+
+    // Window resolution
     instance->winres.x = width;
     instance->winres.y = height;
     instance->orgwinres.x = width;
     instance->orgwinres.y = height;
-    instance->percs.x = 1;
+
+    // Chipmunk2D gravity
     instance->cmap.gravity.x = (double)0.0;
     instance->cmap.gravity.y = (double)-100.0;
-    instance->percs.y = 1;
+
+    // General purpose rendering shader
     instance->gl.shader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/texc.frag").c_str());
+    // Frame buffer shader
     instance->gl.screenShader.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/fb.frag").c_str());
+
+    // Init Lua scripting
     initScript(&instance->cmap.globalscr);
+
     //#ifdef ENABLE_EDITOR
+    // Colour shader
     instance->debugBLOCK.Compile(readFileIntoString("rsc/shaders/transp.vert").c_str(), readFileIntoString("rsc/shaders/rawcol.frag").c_str());
     //#endif
+
     initRenderer(instance);
+
+    // Utility variables
     instance->fps = 1. / 60.;
     instance->edgameRunning = false;
     instance->gameRunning = true;
+
+    // OpenGL viewport
     glViewport(0, 0, instance->winres.x, instance->winres.y);
     return;
 }
 
 void initImGui(GAME *game)
 {
+    // Check version
     IMGUI_CHECKVERSION();
+
+    // Create ImGui
     ImGui::CreateContext();
+    // Retrieves variables to display
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
+    // Style
+    // TODO: Look nice SHFT-12
+    // https://www.unknowncheats.me/forum/c-and-c-/189635-imgui-style-settings.html
     ImGui::StyleColorsDark();
 
+    // OpenGL ImGui integration initialisation
     ImGui_ImplSDL2_InitForOpenGL(game->window, game->context);
     ImGui_ImplOpenGL3_Init();
 }
