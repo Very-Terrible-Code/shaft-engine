@@ -7,7 +7,7 @@
 void initRenderer(GAME *game);
 
 void configFrameBuffer(GAME* game);
-
+void configVertex(GAME *game);
 
 void raw_drawSP(GAME *game, GLuint *texture, glm::vec2 position,  glm::vec2 size, float rotate, glm::vec3 color);
 

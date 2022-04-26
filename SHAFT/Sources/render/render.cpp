@@ -3,29 +3,15 @@
 #include "common.h"
 
 // TODO: Someone who understands OpenGL, please comment this file. Would be hugely appreciated!
+//* i'll will do it soon (pipe)
 
 void initRenderer(GAME *game)
 {
-
-    glGenFramebuffers(1, &game->gl.MSFBO);
-    glGenFramebuffers(1, &game->gl.FBO);
-    glGenRenderbuffers(1, &game->gl.RBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, game->gl.MSFBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, game->gl.RBO);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGB, game->winres.x, game->winres.y);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, game->gl.RBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, game->gl.FBO);
-    glGenTextures(1, &game->gl.tecg);
-    glBindTexture(GL_TEXTURE_2D, game->gl.tecg);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, game->winres.x, game->winres.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, game->gl.tecg, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     configFrameBuffer(game);
+    configVertex(game);
 }
 
-void configFrameBuffer(GAME *game)
+void configVertex(GAME *game)
 {
     unsigned int VBO;
     float vertices[] = {
@@ -50,6 +36,25 @@ void configFrameBuffer(GAME *game)
     glBindVertexArray(0);
 }
 
+void configFrameBuffer(GAME *game)
+{
+    glGenFramebuffers(1, &game->gl.MSFBO);
+    glGenFramebuffers(1, &game->gl.FBO);
+    glGenRenderbuffers(1, &game->gl.RBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, game->gl.MSFBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, game->gl.RBO);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGB, game->winres.x, game->winres.y);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, game->gl.RBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, game->gl.FBO);
+    glGenTextures(1, &game->gl.tecg);
+    glBindTexture(GL_TEXTURE_2D, game->gl.tecg);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, game->winres.x, game->winres.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, game->gl.tecg, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void beginRenderFrameBuffer(GAME *game)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, game->gl.MSFBO);
@@ -62,7 +67,7 @@ void endRenderFrameBuffer(GAME *game)
     glBindFramebuffer(GL_READ_FRAMEBUFFER, game->gl.MSFBO);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, game->gl.FBO);
     glBlitFramebuffer(0, 0, game->winres.x, game->winres.y, 0, 0, game->winres.x, game->winres.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void fRender(GAME *game)
@@ -88,11 +93,10 @@ void renderScene(GAME *game)
     for (int i = 0; i < (int)game->cmap.tiles.size(); i++)
     {
 
-            raw_drawSP(game, (GLuint *)&game->texm.textures[game->cmap.tiles[i].tex].texture.glLoc,
-                       vec2toGLM(game->cmap.tiles[i].pos),
-                       vec2toGLM(game->cmap.tiles[i].scl),
-                       game->cmap.tiles[i].rot, glm::vec3(1));
-
+        raw_drawSP(game, (GLuint *)&game->texm.textures[game->cmap.tiles[i].tex].texture.glLoc,
+                   vec2toGLM(game->cmap.tiles[i].pos),
+                   vec2toGLM(game->cmap.tiles[i].scl),
+                   game->cmap.tiles[i].rot, glm::vec3(1));
     }
     if (game->edgameRunning)
     {
